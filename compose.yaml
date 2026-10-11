@@ -1,0 +1,15 @@
+services:
+  attendance:
+    build: .
+    image: attendance-check:latest
+    container_name: attendance-check
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      # Bind to localhost and put a TLS reverse proxy (nginx, Caddy, ...) in front.
+      - "127.0.0.1:${HOST_PORT:-8000}:8000"
+    volumes:
+      - attendance-data:/data
+
+volumes:
+  attendance-data:

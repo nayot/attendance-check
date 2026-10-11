@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+{% if saved %}<p class="notice">Settings saved.</p>{% endif %}
+<div class="grid-2">
+  <section class="card">
+    <h1>Settings</h1>
+    <form method="post" action="{{ url('/admin/settings') }}" class="stack">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <h3>Branding</h3>
+      <label>Institution name
+        <input name="institution_name" value="{{ st.institution_name }}" maxlength="200" placeholder="e.g. Faculty of Engineering, Example University">
+      </label>
+      <label>App title
+        <input name="app_title" value="{{ st.app_title }}" maxlength="100">
+      </label>
+      <label>Accent colour
+        <input type="color" name="accent_color" value="{{ st.accent_color }}">
+      </label>
+
+      <h3>Who can use it</h3>
+      <label>Student email domains
+        <textarea name="student_domains" rows="2" placeholder="students.example.edu, *.example.edu">{{ st.student_domains | join(', ') }}</textarea>
+        <span class="muted small">Only these domains can check in. <code>*.example.edu</code> matches any subdomain. Leave empty to allow any verified email.</span>
+      </label>
+      <label>Teacher email domains
+        <textarea name="teacher_domains" rows="2" placeholder="example.edu">{{ st.teacher_domains | join(', ') }}</textarea>
+        <span class="muted small">Everyone in these domains can create sessions.</span>
+      </label>
+      <label>Individual teacher emails
+        <textarea name="teacher_emails" rows="3" placeholder="teacher@example.edu">{{ st.teacher_emails | join(', ') }}</textarea>
+      </label>
+      <p class="muted small">Administrators (from ADMIN_EMAILS): {{ config.admin_emails | join(', ') or 'none' }}. They are always teachers too.</p>
+
+      <h3>Check-in</h3>
+      <label>Time zone
+        <select name="timezone">
+          {% for tz in timezones %}<option {% if tz == st.timezone %}selected{% endif %}>{{ tz }}</option>{% endfor %}
+        </select>
+      </label>
+      <label>QR code changes every (seconds)
+        <input type="number" name="qr_interval" min="5" max="120" value="{{ st.qr_interval }}">
+        <span class="muted small">A scanned code stays valid for up to two intervals.</span>
+      </label>
+      <label class="check"><input type="checkbox" name="student_emails_default" value="true" {% if st.student_emails_default %}checked{% endif %}>
+        Email students a confirmation (default for new sessions)</label>
+      <label class="check"><input type="checkbox" name="report_email_default" value="true" {% if st.report_email_default %}checked{% endif %}>
+        Email the teacher the list on close (default for new sessions)</label>
+      <button type="submit">Save settings</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Logos</h2>
+    <p class="muted small">Shown in the header, on the QR display and in emails (the first PNG/JPEG logo). Up to 4 images, 2&nbsp;MB each.</p>
+    <ul class="logo-list">
+      {% for logo in st.logos %}
+      <li>
+        <img src="{{ url('/media/' ~ logo) }}" alt="">
+        {% for action, label in [('up', '↑'), ('down', '↓'), ('delete', 'Remove')] %}
+        <form method="post" action="{{ url('/admin/logos/' ~ logo ~ '/' ~ action) }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          <button type="submit" class="secondary small {{ 'danger-text' if action == 'delete' }}">{{ label }}</button>
+        </form>
+        {% endfor %}
+      </li>
+      {% else %}
+      <li class="muted">No logos yet.</li>
+      {% endfor %}
+    </ul>
+    {% if st.logos | length < 4 %}
+    <form method="post" action="{{ url('/admin/logos') }}" enctype="multipart/form-data" class="stack">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <input type="file" name="file" accept="image/png,image/jpeg,image/gif,image/webp,image/svg+xml" required>
+      <button type="submit" class="secondary">Upload logo</button>
+    </form>
+    {% endif %}
+
+    <h2>Sign-in methods</h2>
+    <ul>
+      {% for p in config.providers %}<li>{{ p.label }} (OIDC)</li>{% endfor %}
+      {% if config.otp_enabled %}<li>One-time code by email</li>{% endif %}
+    </ul>
+    <p class="muted small">Email delivery: {{ 'SMTP ' ~ config.smtp_host if config.smtp_configured else 'not configured (messages are only logged)' }}.
+      These are set in the server's environment.</p>
+  </section>
+</div>
+{% endblock %}

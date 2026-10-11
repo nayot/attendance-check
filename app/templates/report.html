@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Attendance · {{ title }}{% endblock %}
+{% block content %}
+<section class="card">
+  <div class="report-head">
+    <div>
+      <h1>{{ title }}</h1>
+      <p class="muted">{{ local(sess.created_at, '%A %d %B %Y, %H:%M') }}
+        {% if sess.is_closed %}– {{ local(sess.closed_at, '%H:%M') }}{% else %}· <span class="pill open">running</span>{% endif %}</p>
+    </div>
+    <div class="actions">
+      {% if not sess.is_closed %}<a class="button" href="{{ url('/sessions/' ~ sess.id) }}">Back to QR display</a>{% endif %}
+      <a class="button secondary" href="{{ url('/sessions/' ~ sess.id ~ '/report.csv') }}">Download CSV</a>
+      <form method="post" action="{{ url('/sessions/' ~ sess.id ~ '/report/email') }}">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <button type="submit" class="secondary">Email me this list</button>
+      </form>
+    </div>
+  </div>
+  {% if request.query_params.get('sent') %}<p class="notice">The attendance list is on its way to {{ user.email }}.</p>{% endif %}
+
+  <p class="summary">
+    {% for p in phases %}<span><strong>{{ p.checkins | length }}</strong> {{ p.label }}</span>{% endfor %}
+    <span><strong>{{ rows | length }}</strong> students in total</span>
+  </p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>#</th><th>Name</th><th>Email</th>{% for p in phases %}<th>{{ p.label }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>{{ loop.index }}</td><td>{{ r.name }}</td><td>{{ r.email }}</td>
+          {% for p in phases %}<td class="{{ '' if p.id in r.times else 'missing' }}">{{ local(r.times.get(p.id)) or '—' }}</td>{% endfor %}
+        </tr>
+        {% else %}
+        <tr><td colspan="{{ 3 + phases | length }}" class="muted">Nobody has checked in yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="card">
+  <h2>Corrections</h2>
+  <form method="post" action="{{ url('/sessions/' ~ sess.id ~ '/checkins') }}" class="inline-form">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="email" name="email" placeholder="student email" required>
+    <input name="name" placeholder="name (optional)">
+    <select name="phase_id">{% for p in all_phases %}<option value="{{ p.id }}">{{ p.label }}</option>{% endfor %}</select>
+    <button type="submit" class="secondary">Add by hand</button>
+  </form>
+  <details>
+    <summary>Remove a check-in</summary>
+    <ul class="remove-list">
+      {% for p in all_phases %}{% for c in p.checkins %}
+      <li>
+        <form method="post" action="{{ url('/sessions/' ~ sess.id ~ '/checkins/' ~ c.id ~ '/delete') }}">
+          <input type="hidden" name="csrf" value="{{ csrf }}">
+          {{ p.label }} · {{ local(c.created_at) }} · {{ c.name }} &lt;{{ c.email }}&gt;
+          <button type="submit" class="link danger-text">remove</button>
+        </form>
+      </li>
+      {% endfor %}{% endfor %}
+    </ul>
+  </details>
+</section>
+<p><a href="{{ url('/') }}">← All sessions</a></p>
+{% endblock %}

@@ -1,0 +1,183 @@
+import re
+import time
+
+import pytest
+from fastapi.testclient import TestClient
+
+from app import config as config_mod
+from app.main import create_app
+
+TEACHER = "teacher@uni.example"
+STUDENT = "6501@students.uni.example"
+
+
+@pytest.fixture
+def app(tmp_path):
+    cfg = config_mod.load({
+        "PUBLIC_URL": "http://testserver/attendance",
+        "SECRET_KEY": "x" * 40,
+        "DATA_DIR": str(tmp_path),
+        "ADMIN_EMAILS": TEACHER,
+        "STUDENT_DOMAINS": "students.uni.example",
+        "INSTITUTION_NAME": "Example University",
+        "TIMEZONE": "Asia/Bangkok",
+    })
+    return create_app(cfg)
+
+
+def client(app):
+    return TestClient(app, follow_redirects=True)
+
+
+def csrf(c, path="/attendance/login"):
+    html = c.get(path).text
+    return re.search(r'name="csrf" value="([^"]+)"', html).group(1)
+
+
+def login(app, c, email, name="Somchai Jaidee"):
+    mailer = app.state.svc.mailer
+    before = len(mailer.sent)
+    r = c.post("/attendance/login/code", data={"email": email, "csrf": csrf(c)})
+    assert r.status_code == 200, r.text
+    msg = mailer.sent[before]
+    code = re.search(r"\b(\d{6})\b", msg["Subject"]).group(1)
+    token = re.search(r'name="csrf" value="([^"]+)"', r.text).group(1)
+    r = c.post("/attendance/login/verify", data={"code": code, "csrf": token})
+    if "Your name" in r.text:
+        nxt = re.search(r'name="next" value="([^"]+)"', r.text).group(1)
+        token = re.search(r'name="csrf" value="([^"]+)"', r.text).group(1)
+        r = c.post("/attendance/profile", data={"name": name, "next": nxt, "csrf": token})
+    return r
+
+
+def start_session(app, c, **opts):
+    data = {"class_name": "Circuits 101", "mid_checks": "1", "checkout": "true",
+            "email_report": "true", "email_students": "true", "csrf": csrf(c, "/attendance/")}
+    data.update(opts)
+    r = c.post("/attendance/sessions", data=data)
+    assert r.status_code == 200
+    sid = int(re.search(r"/sessions/(\d+)$", str(r.url)).group(1))
+    state = c.get(f"/attendance/sessions/{sid}/state").json()
+    return sid, state
+
+
+def qr_url(app, phase_id):
+    svc = app.state.svc
+    token, _ = svc.signer.current(phase_id, svc.settings().qr_interval)
+    return f"/attendance/c/{phase_id}/{token}"
+
+
+def test_branding_and_redirect(app):
+    c = client(app)
+    r = c.get("/")
+    assert r.url.path == "/attendance/"
+    assert "Example University" in r.text
+
+
+def test_disallowed_domain_cannot_request_code(app):
+    c = client(app)
+    r = c.post("/attendance/login/code", data={"email": "x@gmail.com", "csrf": csrf(c)})
+    assert r.status_code == 403
+    assert not app.state.svc.mailer.sent
+
+
+def test_csrf_required(app):
+    c = client(app)
+    r = c.post("/attendance/login/code", data={"email": STUDENT})
+    assert r.status_code == 403
+
+
+def test_full_flow(app):
+    with client(app) as t:
+        assert "Start a class session" in login(app, t, TEACHER, "Dr Teacher").text
+        sid, state = start_session(app, t)
+        kinds = [p["kind"] for p in state["phases"]]
+        assert kinds == ["checkin", "mid", "checkout"]
+        checkin = state["phases"][0]
+        assert checkin["state"] == "open"
+        url = qr_url(app, checkin["id"])
+
+        with client(app) as s:
+            # Scan before signing in: the scan is remembered through login.
+            r = s.get(url)
+            assert "Sign in" in r.text
+            r = login(app, s, STUDENT)
+            assert "Check-in recorded" in r.text
+            # Second scan is a duplicate, not an error.
+            r = s.get(url)
+            assert "Already checked in" in r.text
+
+            confirmations = [m for m in app.state.svc.mailer.sent if m["To"] == STUDENT and "confirmed" in m["Subject"]]
+            assert len(confirmations) == 1
+
+            # Pause blocks check-in.
+            h = {"X-CSRF-Token": csrf(t, "/attendance/")}
+            mid = state["phases"][1]
+            assert t.post(f"/attendance/sessions/{sid}/phases/{mid['id']}/open", headers=h).status_code == 200
+            assert t.post(f"/attendance/sessions/{sid}/phases/{mid['id']}/pause", headers=h).status_code == 200
+            r = s.get(qr_url(app, mid["id"]))
+            assert r.status_code == 409 and "paused" in r.text
+            t.post(f"/attendance/sessions/{sid}/phases/{mid['id']}/resume", headers=h)
+            assert "Mid-class check 1 recorded" in s.get(qr_url(app, mid["id"])).text
+
+            # Opening the mid check closed the first check-in.
+            r = s.get(url)
+            assert r.status_code == 409 and "closed" in r.text
+
+            # Add a second mid check on the fly; check-out stays last.
+            t.post(f"/attendance/sessions/{sid}/phases", data={"kind": "mid"}, headers=h)
+            labels = [p["label"] for p in t.get(f"/attendance/sessions/{sid}/state").json()["phases"]]
+            assert labels == ["Check-in", "Mid-class check 1", "Mid-class check 2", "Check-out"]
+
+        csv = t.get(f"/attendance/sessions/{sid}/report.csv").text
+        assert STUDENT in csv and "Somchai Jaidee" in csv
+
+        r = t.post(f"/attendance/sessions/{sid}/close", data={"csrf": csrf(t, "/attendance/")})
+        assert "Circuits 101" in r.text
+        report = [m for m in app.state.svc.mailer.sent if m["To"] == TEACHER and "Attendance report" in m["Subject"]]
+        assert len(report) == 1
+        assert any(part.get_filename(" ").endswith(".csv") for part in report[0].iter_attachments())
+
+
+def test_expired_and_forged_tokens(app):
+    with client(app) as t:
+        login(app, t, TEACHER)
+        _, state = start_session(app, t)
+        pid = state["phases"][0]["id"]
+        svc = app.state.svc
+        interval = svc.settings().qr_interval
+        old = svc.signer.token(pid, svc.signer.window(interval, time.time() - 3 * interval))
+        assert t.get(f"/attendance/c/{pid}/{old}").status_code == 410
+        assert t.get(f"/attendance/c/{pid}/forged").status_code == 410
+        # Previous window still accepted.
+        prev = svc.signer.token(pid, svc.signer.window(interval) - 1)
+        assert t.get(f"/attendance/c/{pid}/{prev}").status_code != 410
+
+
+def test_student_cannot_open_teacher_pages(app):
+    with client(app) as s:
+        login(app, s, STUDENT)
+        assert s.get("/attendance/admin/settings").status_code == 403
+        r = s.post("/attendance/sessions", data={"csrf": csrf(s, "/attendance/profile")})
+        assert r.status_code == 403
+
+
+def test_settings_and_logo(app):
+    with client(app) as t:
+        login(app, t, TEACHER)
+        token = csrf(t, "/attendance/admin/settings")
+        r = t.post("/attendance/admin/settings", data={
+            "csrf": token, "institution_name": "Another Institute", "app_title": "Roll Call",
+            "student_domains": "@a.example\n*.b.example", "timezone": "Europe/Berlin", "qr_interval": "10",
+            "accent_color": "#123456",
+        })
+        assert "Another Institute" in r.text and "Roll Call" in r.text
+        png = bytes.fromhex("89504e470d0a1a0a0000000d4948445200000001000000010806000000"
+                            "1f15c4890000000d49444154789c6360000002000154a24f5d0000000049454e44ae426082")
+        r = t.post("/attendance/admin/logos", data={"csrf": token}, files={"file": ("l.png", png, "image/png")})
+        assert r.status_code == 200
+        logo = app.state.svc.settings().logos[0]
+        assert t.get(f"/attendance/media/{logo}").content == png
+        st = app.state.svc.settings()
+        assert st.student_allowed("x@a.example") and st.student_allowed("x@cs.b.example")
+        assert not st.student_allowed("x@b.example.com")

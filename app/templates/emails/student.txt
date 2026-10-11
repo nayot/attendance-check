@@ -1,0 +1,7 @@
+Hello {{ name or 'there' }},
+
+Your {{ phase | lower }} for {{ title }} was recorded at {{ time }} ({{ timezone }}).
+
+If this wasn't you, tell your teacher.
+
+{{ st.institution_name or st.app_title }}

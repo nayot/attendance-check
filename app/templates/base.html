@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ st.app_title }}{% endblock %}{% if st.institution_name %} · {{ st.institution_name }}{% endif %}</title>
+  <link rel="stylesheet" href="{{ url('/static/app.css') }}">
+  <style>:root { --accent: {{ st.accent_color }}; }</style>
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  {% block header %}
+  <header class="topbar">
+    <a class="brand" href="{{ url('/') }}">
+      {% for logo in st.logos %}<img src="{{ url('/media/' ~ logo) }}" alt="">{% endfor %}
+      <span>
+        {% if st.institution_name %}<small>{{ st.institution_name }}</small>{% endif %}
+        <strong>{{ st.app_title }}</strong>
+      </span>
+    </a>
+    {% if user %}
+    <nav>
+      {% if is_admin %}<a href="{{ url('/admin/settings') }}">Settings</a>{% endif %}
+      <span class="who" title="{{ user.email }}">{{ user.name or user.email }}</span>
+      <a href="{{ url('/logout') }}">Sign out</a>
+    </nav>
+    {% endif %}
+  </header>
+  {% endblock %}
+  <main class="{% block main_class %}page{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

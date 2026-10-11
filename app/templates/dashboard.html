@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="grid-2">
+  <section class="card">
+    <h1>Start a class session</h1>
+    <form method="post" action="{{ url('/sessions') }}" class="stack">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <label><span>Class name <span class="muted">(optional)</span></span>
+        <input name="class_name" list="class-names" maxlength="200" placeholder="e.g. Circuit Analysis, Sec 01">
+        <datalist id="class-names">{% for n in class_names %}<option value="{{ n }}">{% endfor %}</datalist>
+      </label>
+      <label>Mid-class checks
+        <select name="mid_checks">
+          {% for n in range(0, 4) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" name="checkout" value="true"> Check-out at the end of class</label>
+      <label class="check"><input type="checkbox" name="email_students" value="true" {% if st.student_emails_default %}checked{% endif %}>
+        Email each student a confirmation</label>
+      <label class="check"><input type="checkbox" name="email_report" value="true" {% if st.report_email_default %}checked{% endif %}>
+        Email me the attendance list when I close the session</label>
+      <p class="muted small">You can add mid-class checks and a check-out while the class is running.</p>
+      <button type="submit" class="large">Start and show QR code</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Your sessions</h2>
+    {% if not sessions %}<p class="muted">No sessions yet.</p>{% endif %}
+    <ul class="session-list">
+      {% for s in sessions %}
+      <li>
+        <a href="{{ url('/sessions/' ~ s.id ~ ('/report' if s.is_closed else '')) }}">
+          <strong>{{ s.class_name or 'Class session' }}</strong>
+          <span class="muted">{{ local(s.created_at, '%d %b %Y, %H:%M') }}</span>
+        </a>
+        <span class="pill {{ 'closed' if s.is_closed else 'open' }}">{{ 'closed' if s.is_closed else 'running' }}</span>
+        <span class="muted small">{{ s.counts | join(' / ') }} checked in</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+{% endblock %}

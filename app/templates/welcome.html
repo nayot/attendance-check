@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block main_class %}page narrow{% endblock %}
+{% block content %}
+<section class="card center">
+  <h1>{{ st.app_title }}</h1>
+  <p>Teachers: sign in to start a class session and show its check-in QR code.</p>
+  <p>Students: scan the QR code on the classroom screen with your phone's camera.</p>
+  <p><a class="button" href="{{ url('/login') }}">Sign in</a></p>
+</section>
+{% endblock %}

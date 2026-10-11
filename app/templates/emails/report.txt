@@ -1,0 +1,9 @@
+Attendance: {{ title }}
+{{ date }}
+
+{% for p in phases %}{{ p.label }}: {{ p.checkins | length }}
+{% endfor %}Students in total: {{ rows | length }}
+
+{% for r in rows %}{{ loop.index }}. {{ r.name }} <{{ r.email }}>{% for p in phases %}  {{ p.label }}: {{ local(r.times.get(p.id)) or '-' }}{% endfor %}
+{% endfor %}
+The full list is attached as a CSV file. View it online: {{ report_url }}
