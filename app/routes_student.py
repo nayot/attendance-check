@@ -7,12 +7,10 @@ from fastapi.responses import RedirectResponse
 
 from . import attendance as att
 from .db import Phase
+from .routes_auth import PENDING_TTL
 from .web import current_user, login_url, render, svc
 
 router = APIRouter()
-
-# A scan stays valid this long while the student signs in.
-PENDING_TTL = 180
 
 
 def _result(request: Request, r: att.CheckInResult, status_code: int = 200):

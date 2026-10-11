@@ -181,3 +181,20 @@ def test_settings_and_logo(app):
         st = app.state.svc.settings()
         assert st.student_allowed("x@a.example") and st.student_allowed("x@cs.b.example")
         assert not st.student_allowed("x@b.example.com")
+
+
+def test_unknown_route_uses_message_page(app):
+    r = client(app).get("/attendance/nope")
+    assert r.status_code == 404 and "Not found" in r.text
+
+
+def test_stale_pending_scan_is_ignored(app, monkeypatch):
+    with client(app) as t:
+        login(app, t, TEACHER)
+        _, state = start_session(app, t)
+        url = qr_url(app, state["phases"][0]["id"])
+    with client(app) as s:
+        s.get(url)  # scan while signed out: remembered as pending
+        monkeypatch.setattr("app.routes_auth.PENDING_TTL", -1)  # scan has expired
+        r = login(app, s, STUDENT)
+        assert "You're signed in" in r.text

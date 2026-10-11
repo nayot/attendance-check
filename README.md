@@ -29,7 +29,8 @@ Only addresses in the allowed student domains can check in or request a code.
 git clone https://github.com/<you>/attendance-check.git
 cd attendance-check
 cp .env.example .env
-# edit .env: PUBLIC_URL, SECRET_KEY, ADMIN_EMAILS, STUDENT_DOMAINS, SMTP_*, OIDC_*
+# edit .env: PUBLIC_URL, SECRET_KEY, ADMIN_EMAILS, STUDENT_DOMAINS, SMTP_*, OIDC_*,
+# and HOST_PORT if port 8000 is already in use on the host
 docker compose up -d --build
 ```
 

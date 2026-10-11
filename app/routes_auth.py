@@ -5,6 +5,7 @@ import hmac
 import logging
 import re
 import secrets
+import time
 from datetime import timedelta
 from urllib.parse import quote
 
@@ -18,6 +19,8 @@ from .web import check_csrf, current_user, render, safe_next, svc
 log = logging.getLogger("attendance.auth")
 router = APIRouter()
 
+# A QR scan stays valid this long while the student signs in.
+PENDING_TTL = 180
 CODE_TTL = timedelta(minutes=10)
 CODE_RESEND = timedelta(seconds=60)
 CODE_ATTEMPTS = 5
@@ -59,9 +62,12 @@ def finish_login(request: Request, email: str, name: str) -> RedirectResponse:
     request.session.pop("csrf", None)
     request.session["user"] = {"email": email, "name": name}
     target = safe_next(request, request.session.pop("next", None))
-    if request.session.get("pending"):
+    pending = request.session.get("pending")
+    if pending and time.time() - pending.get("at", 0) <= PENDING_TTL:
         # A QR scan is waiting for this login; finish it whatever the next page was.
         target = s.url("/checkin")
+    else:
+        request.session.pop("pending", None)
     if not name:
         return RedirectResponse(s.url("/profile?next=" + quote(target)), status_code=303)
     return RedirectResponse(target, status_code=303)

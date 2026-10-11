@@ -63,8 +63,8 @@ class Mailer:
         for filename, mime, data in attachments:
             maintype, subtype = mime.split("/", 1)
             msg.add_attachment(data, maintype=maintype, subtype=subtype, filename=filename)
-        if self._thread is None:
-            self._deliver(msg)
+        if self._thread is None or not self.config.smtp_configured:
+            self._deliver(msg)  # nothing slow to wait on
         else:
             self._queue.put(msg)
 
