@@ -12,11 +12,17 @@
   {% block header %}
   <header class="topbar">
     <a class="brand" href="{{ url('/') }}">
-      {% for logo in st.logos %}<img src="{{ url('/media/' ~ logo) }}" alt="">{% endfor %}
+      {% for logo in st.logos %}<img src="{{ url('/media/' ~ logo) }}" alt="{{ st.institution_name if loop.first else '' }}">{% endfor %}
+      {% if st.logos %}
+      {# The logo already names the institution; show just the app title beside it. #}
+      <span class="divider-bar"></span>
+      <span class="title-only"><strong>{{ st.app_title }}</strong></span>
+      {% else %}
       <span>
         {% if st.institution_name %}<small>{{ st.institution_name }}</small>{% endif %}
         <strong>{{ st.app_title }}</strong>
       </span>
+      {% endif %}
     </a>
     <nav>
       {% include "lang_switch.html" %}

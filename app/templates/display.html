@@ -7,9 +7,10 @@
 <div id="app" data-session="{{ sess.id }}" data-base="{{ url('') }}" data-csrf="{{ csrf }}">
   <header class="display-head">
     <div class="brand">
-      {% for logo in st.logos %}<img src="{{ url('/media/' ~ logo) }}" alt="">{% endfor %}
+      {% for logo in st.logos %}<img src="{{ url('/media/' ~ logo) }}" alt="{{ st.institution_name if loop.first else '' }}">{% endfor %}
+      {% if st.logos %}<span class="divider-bar"></span>{% endif %}
       <div>
-        {% if st.institution_name %}<small>{{ st.institution_name }}</small>{% endif %}
+        {% if st.institution_name and not st.logos %}<small>{{ st.institution_name }}</small>{% endif %}
         <h1>{{ title }}</h1>
       </div>
     </div>
