@@ -144,7 +144,11 @@ def test_full_flow(app):
         assert "Circuits 101" in r.text
         report = [m for m in app.state.svc.mailer.sent if m["To"] == TEACHER and "Attendance report" in m["Subject"]]
         assert len(report) == 1
-        assert any(part.get_filename(" ").endswith(".csv") for part in report[0].iter_attachments())
+        # The list is in the message body as a table, not attached.
+        assert not list(report[0].iter_attachments())
+        text = report[0].get_body(("plain",)).get_content()
+        assert "| 1 | Somchai Jaidee | " + STUDENT + " |" in text
+        assert "<table" in report[0].get_body(("html",)).get_content()
 
 
 def test_expired_and_forged_tokens(app):

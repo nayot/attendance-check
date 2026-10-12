@@ -9,8 +9,8 @@ A small self-hosted web app that lets teachers take class attendance with a rota
 - **Pause** stops check-in instantly. The QR code is hidden, and codes already scanned are rejected.
 - Add **mid-class checks** and a **check-out** when you set up the session or while class is running.
 - Each student gets a confirmation email, sent from the teacher's own Gmail / Google Workspace address
-  (or from a shared SMTP account). When the session closes, the teacher gets the list by email with a
-  CSV file attached. The list can also be downloaded or corrected by hand.
+  (or from a shared SMTP account). When the session closes, the teacher gets the list by email as a
+  table in the message body (no attachment), easy to paste into a spreadsheet or hand to an AI assistant. The list can also be downloaded or corrected by hand.
 - English and Thai interface. Everyone can switch language in the header, and the admin picks the default,
   which is also used for emails.
 - English and Thai user interface: everyone can switch language in the header, and an admin picks the default

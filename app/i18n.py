@@ -244,7 +244,6 @@ TH = {
     "Your {phase} for {title} was recorded at {time} ({tz}).": "ระบบบันทึก{phase}วิชา {title} ของคุณแล้ว เวลา {time} ({tz})",
     "If this wasn't you, tell your teacher.": "หากไม่ใช่คุณ กรุณาแจ้งอาจารย์ผู้สอน",
     "Students in total": "จำนวนนักศึกษาทั้งหมด",
-    "The full list is attached as a CSV file.": "แนบรายชื่อทั้งหมดเป็นไฟล์ CSV",
     "View it online": "ดูออนไลน์",
 }
 

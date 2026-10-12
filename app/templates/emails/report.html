@@ -1,7 +1,7 @@
 {% extends "emails/layout.html" %}
 {% block body %}
 <h2 style="margin:0 0 4px;">{{ title }}</h2>
-<p style="margin:0 0 16px;color:#666;">{{ date }}</p>
+<p style="margin:0 0 16px;color:#666;">{{ date }} ({{ st.timezone }})</p>
 <p>
   {% for p in phases %}<strong>{{ p.checkins | length }}</strong> {{ phase_label(p.label) }} &nbsp;·&nbsp; {% endfor %}
   <strong>{{ rows | length }}</strong> {{ _("students in total") }}
@@ -17,5 +17,5 @@
   </tr>
   {% endfor %}
 </table>
-<p style="margin-top:20px;">{{ _("The full list is attached as a CSV file.") }} <a href="{{ report_url }}">{{ _("View it online") }}</a>.</p>
+<p style="margin-top:20px;"><a href="{{ report_url }}">{{ _("View it online") }}</a></p>
 {% endblock %}

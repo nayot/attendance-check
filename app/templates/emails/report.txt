@@ -1,9 +1,11 @@
 {{ _("Attendance") }}: {{ title }}
-{{ date }}
+{{ date }} ({{ st.timezone }})
 
 {% for p in phases %}{{ phase_label(p.label) }}: {{ p.checkins | length }}
 {% endfor %}{{ _("Students in total") }}: {{ rows | length }}
 
-{% for r in rows %}{{ loop.index }}. {{ r.name }} <{{ r.email }}>{% for p in phases %}  {{ phase_label(p.label) }}: {{ local(r.times.get(p.id)) or '-' }}{% endfor %}
+| # | {{ _("Name") }} | {{ _("Email") }} |{% for p in phases %} {{ phase_label(p.label) }} |{% endfor %}
+|---|---|---|{% for p in phases %}---|{% endfor %}
+{% for r in rows %}| {{ loop.index }} | {{ r.name | replace("|", "/") }} | {{ r.email }} |{% for p in phases %} {{ local(r.times.get(p.id)) or "-" }} |{% endfor %}
 {% endfor %}
-{{ _("The full list is attached as a CSV file.") }} {{ _("View it online") }}: {{ report_url }}
+{{ _("View it online") }}: {{ report_url }}

@@ -323,7 +323,6 @@ def send_report_email(svc: Services, session_id: int, to: str) -> None:
     date = format_local(sess.created_at, st, "%d %b %Y", lang)
     _email(
         svc, st, to, i18n.gettext(lang, "Attendance report: {title} ({date})", title=title, date=date), "report",
-        attachments=[(report_filename(sess, st), "text/csv", report_csv(sess, st).encode("utf-8"))],
         teacher=sess.teacher_email,
         title=title, sess=sess, phases=phases, rows=rows,
         date=format_local(sess.created_at, st, "%d %b %Y, %H:%M", lang),
