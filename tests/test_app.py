@@ -293,3 +293,37 @@ def test_emails_follow_default_language(app):
     msg = [m for m in app.state.svc.mailer.sent if m["To"] == STUDENT][-1]
     assert msg["Subject"].startswith("ยืนยันเช็คชื่อเข้าเรียน")
     assert "เรียน Somchai Jaidee" in msg.get_body(("plain",)).get_content()
+
+
+def test_archive_and_delete(app):
+    with client(app) as t:
+        login(app, t, TEACHER)
+        sid, _ = start_session(app, t)
+        token = csrf(t, "/attendance/")
+        r = t.post(f"/attendance/sessions/{sid}/manage/archive", data={"csrf": token})
+        link = f'/attendance/sessions/{sid}/report"'
+        assert link not in r.text and "Archived (1)" in r.text
+        state = t.get(f"/attendance/sessions/{sid}/state").json()
+        assert state["closed"]  # archiving a running session closes it
+        assert link in t.get("/attendance/?archived=1").text
+        r = t.post(f"/attendance/sessions/{sid}/manage/unarchive", data={"csrf": token})
+        assert link in r.text
+        t.post(f"/attendance/sessions/{sid}/manage/delete", data={"csrf": token})
+        assert t.get(f"/attendance/sessions/{sid}/report").status_code == 404
+        # Report email was not sent by archiving.
+        assert not [m for m in app.state.svc.mailer.sent if "Attendance report" in m["Subject"]]
+
+
+def test_adds_missing_columns(tmp_path):
+    import sqlite3
+
+    from app.db import Database
+    db_file = tmp_path / "old.db"
+    con = sqlite3.connect(db_file)
+    con.execute("create table sessions (id integer primary key, teacher_email varchar, class_name varchar, "
+                "email_report boolean, email_students boolean, created_at datetime, closed_at datetime)")
+    con.commit()
+    con.close()
+    Database(db_file)
+    cols = {r[1] for r in sqlite3.connect(db_file).execute("pragma table_info(sessions)")}
+    assert "archived_at" in cols

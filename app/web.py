@@ -9,7 +9,7 @@ from urllib.parse import quote
 from fastapi import HTTPException, Request
 from fastapi.templating import Jinja2Templates
 
-from . import i18n
+from . import COPYRIGHT, SOURCE_URL, __version__, i18n
 from . import settings as settings_mod
 from .config import Config
 from .db import Database
@@ -136,6 +136,9 @@ def render(request: Request, name: str, status_code: int = 200, **context):
     lang = language(request, st)
     context.update(
         lang=lang,
+        version=__version__,
+        copyright=COPYRIGHT,
+        source_url=SOURCE_URL,
         languages=i18n.LANGUAGES,
         _=i18n.translator(lang),
         phase_label=lambda label: i18n.phase_label(label, lang),

@@ -37,6 +37,11 @@
   <main class="{% block main_class %}page{% endblock %}">
     {% block content %}{% endblock %}
   </main>
+  {% block footer %}
+  <footer class="site-footer">
+    {{ copyright }} · <a href="{{ source_url }}">{{ st.app_title }} v{{ version }}</a> · MIT License
+  </footer>
+  {% endblock %}
   {% block scripts %}{% endblock %}
 </body>
 </html>

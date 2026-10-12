@@ -142,6 +142,9 @@ set the starting values on first run.
    Opening one closes the one before it.
 6. **Close session** ends it and, if you chose that option, emails you the list.
 
+Use the **…** menu next to a session on the dashboard to **archive** it (hidden from the list, kept in
+**Archived**) or **delete** it with all its check-ins.
+
 On the report page you can download the CSV, email it to yourself again, add a student by hand or remove a
 mistaken check-in.
 
@@ -175,4 +178,4 @@ Thai translation, so run it after adding text.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). © 2026 Nayot Kurukitkoson, Faculty of Engineering, Burapha University.

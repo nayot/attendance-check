@@ -80,6 +80,7 @@ class ClassSession(Base):
     email_students: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(AwareDateTime, default=utcnow)
     closed_at: Mapped[datetime | None] = mapped_column(AwareDateTime, nullable=True)
+    archived_at: Mapped[datetime | None] = mapped_column(AwareDateTime, nullable=True)
 
     phases: Mapped[list["Phase"]] = relationship(
         back_populates="session", order_by="Phase.position", cascade="all, delete-orphan"
@@ -145,10 +146,22 @@ class Database:
             cur.close()
 
         Base.metadata.create_all(self.engine)
+        self._add_missing_columns()
         self.Session = sessionmaker(self.engine, expire_on_commit=False)
 
     def session(self) -> Session:
         return self.Session()
+
+    def _add_missing_columns(self) -> None:
+        """create_all() won't add columns to existing tables; add nullable ones here."""
+        with self.engine.begin() as conn:
+            for table in Base.metadata.sorted_tables:
+                existing = {row[1] for row in conn.exec_driver_sql(f"PRAGMA table_info({table.name})")}
+                for col in table.columns:
+                    if col.name not in existing and col.nullable:
+                        conn.exec_driver_sql(
+                            f"ALTER TABLE {table.name} ADD COLUMN {col.name} {col.type.compile(self.engine.dialect)}"
+                        )
 
 
 __all__ = [

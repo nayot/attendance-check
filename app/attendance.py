@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
-from . import i18n
+from . import COPYRIGHT, i18n
 from .db import CheckIn, ClassSession, Phase, User, utcnow
 from .settings import Settings
 from .web import Services, format_local
@@ -127,6 +127,30 @@ def close_session(svc: Services, session_id: int) -> None:
     svc.broker.publish(session_id, "state", {})
     if send_report:
         send_report_email(svc, session_id, teacher)
+
+
+def manage_session(svc: Services, session_id: int, action: str) -> bool:
+    """Archive, unarchive or delete. Returns whether the session was archived before."""
+    with svc.db.session() as db:
+        sess = db.get(ClassSession, session_id)
+        was_archived = sess.archived_at is not None
+        if action == "delete":
+            db.delete(sess)
+        elif action == "archive":
+            if not sess.is_closed:
+                # Archiving a running session ends it, without the report email.
+                now = utcnow()
+                for p in sess.phases:
+                    if p.state in ("open", "paused"):
+                        p.closed_at = now
+                    p.state = "closed"
+                sess.closed_at = now
+            sess.archived_at = utcnow()
+        elif action == "unarchive":
+            sess.archived_at = None
+        db.commit()
+    svc.broker.publish(session_id, "state", {})
+    return was_archived
 
 
 @dataclass
@@ -260,7 +284,7 @@ def _email(svc: Services, st: Settings, to: str, subject: str, template: str, at
            teacher: str | None = None, **ctx) -> None:
     logo = _logo(svc, st)
     lang = st.default_language
-    ctx.update(st=st, has_logo=logo is not None, app_url=svc.absolute("/"), lang=lang,
+    ctx.update(st=st, has_logo=logo is not None, app_url=svc.absolute("/"), lang=lang, copyright=COPYRIGHT,
                _=i18n.translator(lang), phase_label=lambda label: i18n.phase_label(label, lang))
     html = EMAILS.get_template(f"emails/{template}.html").render(**ctx)
     text = EMAILS.get_template(f"emails/{template}.txt").render(**ctx)

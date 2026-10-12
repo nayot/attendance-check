@@ -41,8 +41,12 @@
   </section>
 
   <section class="card">
-    <h2>{{ _("Your sessions") }}</h2>
-    {% if not sessions %}<p class="muted">{{ _("No sessions yet.") }}</p>{% endif %}
+    <div class="list-title-row">
+      <h2>{{ _("Archived sessions") if showing_archived else _("Your sessions") }}</h2>
+      {% if showing_archived %}<a href="{{ url('/') }}">{{ _("← Your sessions") }}</a>
+      {% elif archived_count %}<a href="{{ url('/?archived=1') }}">{{ _("Archived ({n})", n=archived_count) }}</a>{% endif %}
+    </div>
+    {% if not sessions %}<p class="muted">{{ _("No archived sessions.") if showing_archived else _("No sessions yet.") }}</p>{% endif %}
     <ul class="session-list">
       {% for s in sessions %}
       <li>
@@ -52,9 +56,41 @@
         </a>
         <span class="pill {{ 'closed' if s.is_closed else 'open' }}">{{ _("closed") if s.is_closed else _("running") }}</span>
         <span class="muted small">{{ s.counts | join(' / ') }} {{ _("checked in") }}</span>
+        <details class="menu">
+          <summary title="{{ _('More actions') }}" aria-label="{{ _('More actions') }}">…</summary>
+          <div class="menu-items">
+            {% if s.archived_at %}
+            <form method="post" action="{{ url('/sessions/' ~ s.id ~ '/manage/unarchive') }}">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <button type="submit" class="link">{{ _("Unarchive") }}</button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ url('/sessions/' ~ s.id ~ '/manage/archive') }}"
+                  {% if not s.is_closed %}data-confirm="{{ _('Archiving closes this running session. Continue?') }}"{% endif %}>
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <button type="submit" class="link">{{ _("Archive") }}</button>
+            </form>
+            {% endif %}
+            <form method="post" action="{{ url('/sessions/' ~ s.id ~ '/manage/delete') }}"
+                  data-confirm="{{ _('Delete this session and all its check-ins? This cannot be undone.') }}">
+              <input type="hidden" name="csrf" value="{{ csrf }}">
+              <button type="submit" class="link danger-text">{{ _("Delete") }}</button>
+            </form>
+          </div>
+        </details>
       </li>
       {% endfor %}
     </ul>
   </section>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+  document.querySelectorAll("form[data-confirm]").forEach((f) =>
+    f.addEventListener("submit", (e) => { if (!confirm(f.dataset.confirm)) e.preventDefault(); }));
+  // Close an open "…" menu when clicking elsewhere.
+  document.addEventListener("click", (e) => {
+    document.querySelectorAll("details.menu[open]").forEach((d) => { if (!d.contains(e.target)) d.open = false; });
+  });
+</script>
 {% endblock %}

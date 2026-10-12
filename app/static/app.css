@@ -30,6 +30,11 @@ h3 { font-size: 1rem; margin: 1rem 0 0; color: var(--muted); text-transform: upp
 .muted { color: var(--muted); }
 .small { font-size: .85rem; }
 
+body { min-height: 100vh; display: flex; flex-direction: column; }
+body > main { flex: 1; width: 100%; }
+.site-footer { text-align: center; color: var(--muted); font-size: .8rem; padding: 1.5rem 1rem 1.25rem; }
+.site-footer a { color: inherit; }
+
 /* Header */
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   padding: .6rem 1.25rem; background: var(--card); border-top: 4px solid var(--accent);
@@ -88,6 +93,18 @@ button:disabled { opacity: .45; cursor: default; }
 .session-list { list-style: none; margin: 0; padding: 0; }
 .session-list li { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; padding: .6rem 0; border-top: 1px solid var(--line); }
 .session-list a { flex: 1; text-decoration: none; color: inherit; display: flex; flex-direction: column; }
+.list-title-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.list-title-row a { font-size: .9rem; }
+details.menu { position: relative; }
+details.menu summary { list-style: none; cursor: pointer; padding: .1rem .55rem; border-radius: 6px;
+  font-weight: 700; color: var(--muted); line-height: 1.4; }
+details.menu summary::-webkit-details-marker { display: none; }
+details.menu summary:hover, details.menu[open] summary { background: var(--accent-soft); color: var(--accent-ink); }
+.menu-items { position: absolute; right: 0; top: 100%; z-index: 10; min-width: 9rem; padding: .35rem 0;
+  background: var(--card); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 18px rgb(0 0 0 / .1); }
+.menu-items form { margin: 0; }
+.menu-items button.link { display: block; width: 100%; text-align: left; padding: .45rem .9rem; text-decoration: none; color: var(--text); }
+.menu-items button.link:hover { background: var(--accent-soft); }
 .pill { font-size: .75rem; padding: .1rem .5rem; border-radius: 99px; background: var(--line); }
 .pill.open { background: #dcfae6; color: var(--ok); }
 .report-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; }

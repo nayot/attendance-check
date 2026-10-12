@@ -96,6 +96,16 @@ TH = {
     "Until then, they are sent from the app's address.": "ระหว่างนี้ระบบจะส่งจากอีเมลของแอป",
     "Until then, no emails are sent.": "ระหว่างนี้จะยังไม่มีการส่งอีเมล",
     "Connect Gmail": "เชื่อมต่อ Gmail",
+    "Archived sessions": "คาบเรียนที่เก็บถาวร",
+    "← Your sessions": "← คาบเรียนของคุณ",
+    "Archived ({n})": "เก็บถาวร ({n})",
+    "No archived sessions.": "ไม่มีคาบเรียนที่เก็บถาวร",
+    "More actions": "ตัวเลือกเพิ่มเติม",
+    "Archive": "เก็บถาวร",
+    "Unarchive": "นำกลับจากที่เก็บถาวร",
+    "Delete": "ลบ",
+    "Archiving closes this running session. Continue?": "การเก็บถาวรจะปิดคาบเรียนที่กำลังดำเนินการอยู่ ต้องการดำเนินการต่อหรือไม่",
+    "Delete this session and all its check-ins? This cannot be undone.": "ลบคาบเรียนนี้และการเช็คชื่อทั้งหมดหรือไม่ การลบนี้ย้อนกลับไม่ได้",
 
     # Display
     "Scan with your phone camera to check in": "สแกนด้วยกล้องโทรศัพท์เพื่อเช็คชื่อ",

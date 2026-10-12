@@ -9,7 +9,7 @@ import qrcode
 import qrcode.image.svg
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import JSONResponse, RedirectResponse, Response, StreamingResponse
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from . import attendance as att
 from . import i18n
@@ -29,7 +29,7 @@ def own_session(request: Request, session_id: int, user: dict) -> ClassSession:
 
 
 @router.get("/")
-def home(request: Request):
+def home(request: Request, archived: int = 0):
     s = svc(request)
     user = request.session.get("user")
     if not user:
@@ -40,14 +40,23 @@ def home(request: Request):
         sessions = db.scalars(
             select(ClassSession)
             .where(ClassSession.teacher_email == user["email"])
+            .where(ClassSession.archived_at.is_not(None) if archived else ClassSession.archived_at.is_(None))
             .order_by(ClassSession.created_at.desc())
-            .limit(50)
+            .limit(100)
         ).all()
         for sess in sessions:
             sess.counts = [len(p.checkins) for p in sess.phases]
-    names = sorted({x.class_name for x in sessions if x.class_name})
+        archived_count = db.scalar(
+            select(func.count()).select_from(ClassSession)
+            .where(ClassSession.teacher_email == user["email"], ClassSession.archived_at.is_not(None))
+        )
+        names = sorted(set(db.scalars(
+            select(ClassSession.class_name).where(ClassSession.teacher_email == user["email"],
+                                                  ClassSession.class_name != "")
+        )))
     gmail = s.mailer.gmail
     return render(request, "dashboard.html", sessions=sessions, class_names=names,
+                  showing_archived=bool(archived), archived_count=archived_count,
                   gmail_enabled=gmail is not None, smtp_configured=s.config.smtp_configured, gmail_connected=bool(gmail and gmail.connected(user["email"])))
 
 
@@ -169,6 +178,18 @@ def session_close(request: Request, session_id: int, user: dict = Depends(requir
     own_session(request, session_id, user)
     att.close_session(svc(request), session_id)
     return RedirectResponse(svc(request).url(f"/sessions/{session_id}/report"), status_code=303)
+
+
+@router.post("/sessions/{session_id}/manage/{action}", dependencies=[Depends(check_csrf)])
+def session_manage(request: Request, session_id: int, action: str, user: dict = Depends(require_teacher)):
+    """Archive, unarchive or delete a session from the dashboard."""
+    if action not in ("archive", "unarchive", "delete"):
+        raise HTTPException(404)
+    s = svc(request)
+    own_session(request, session_id, user)
+    was_archived = att.manage_session(s, session_id, action)
+    back = "/?archived=1" if was_archived and action != "unarchive" else "/"
+    return RedirectResponse(s.url(back), status_code=303)
 
 
 @router.get("/sessions/{session_id}/report")
