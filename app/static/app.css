@@ -120,6 +120,21 @@ td.missing { color: var(--bad); }
 .logo-list li { display: flex; align-items: center; gap: .5rem; padding: .4rem 0; border-top: 1px solid var(--line); }
 .logo-list img { height: 48px; max-width: 160px; object-fit: contain; margin-right: auto; }
 
+/* Help */
+.help-layout { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 1rem; align-items: start; }
+.help-toc { position: sticky; top: 1rem; font-size: .92rem; }
+.help-toc ol { padding-left: 1.2rem; margin: .5rem 0 0; }
+.help-toc li { margin: .25rem 0; }
+.help-toc a { text-decoration: none; }
+.help-toc a:hover { text-decoration: underline; }
+.help { line-height: 1.65; max-width: 52rem; }
+.help h2 { margin-top: 1.8rem; padding-top: .4rem; border-top: 1px solid var(--line); color: var(--accent-ink); scroll-margin-top: 1rem; }
+.help li { margin: .3rem 0; }
+.help dt { font-weight: 700; margin-top: .8rem; }
+.help dd { margin: .2rem 0 0 1rem; }
+kbd { font: inherit; font-size: .85em; padding: .05rem .4rem; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; background: #fff; }
+@media (max-width: 800px) { .help-layout { grid-template-columns: 1fr; } .help-toc { position: static; } }
+
 /* Check-in result (student phone) */
 .result-icon { font-size: 4rem; width: 6rem; height: 6rem; line-height: 6rem; border-radius: 50%; margin: 0 auto 1rem; color: #fff; }
 .result.ok .result-icon { background: var(--ok); }

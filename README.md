@@ -154,6 +154,8 @@ Interface text is written in English and translated through the catalogs in [`ap
 To add a language, copy the `TH` dictionary, translate the values and register it in `CATALOGS` and `LANGUAGES`.
 `tests/test_i18n.py` checks that every string shown in the UI has a translation.
 
+A teacher's manual, in English and Thai, is built into the app: click **Help** at the top of any page.
+
 ## Development
 
 ```sh

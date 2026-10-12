@@ -60,6 +60,11 @@ def home(request: Request, archived: int = 0):
                   gmail_enabled=gmail is not None, smtp_configured=s.config.smtp_configured, gmail_connected=bool(gmail and gmail.connected(user["email"])))
 
 
+@router.get("/help")
+def help_page(request: Request):
+    return render(request, "help.html")
+
+
 @router.post("/sessions", dependencies=[Depends(check_csrf)])
 def new_session(
     request: Request,

@@ -26,6 +26,7 @@
     </a>
     <nav>
       {% include "lang_switch.html" %}
+      <a href="{{ url('/help') }}">{{ _("Help") }}</a>
       {% if user %}
       {% if is_admin %}<a href="{{ url('/admin/settings') }}">{{ _("Settings") }}</a>{% endif %}
       <span class="who" title="{{ user.email }}">{{ user.name or user.email }}</span>

@@ -17,6 +17,7 @@ TH = {
     "Sign in": "เข้าสู่ระบบ",
     "Home": "หน้าแรก",
     "Language": "ภาษา",
+    "Help": "คู่มือ",
 
     # Welcome / student home
     "Teachers: sign in to start a class session and show its check-in QR code.":

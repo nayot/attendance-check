@@ -1,0 +1,130 @@
+{% set domains = st.student_domains | join(', ') %}
+<nav class="card help-toc" aria-label="Contents">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#overview">How it works</a></li>
+    <li><a href="#signin">Signing in</a></li>
+    <li><a href="#gmail">Connecting Gmail</a></li>
+    <li><a href="#start">Starting a class session</a></li>
+    <li><a href="#display">The QR display</a></li>
+    <li><a href="#checks">Mid-class checks and check-out</a></li>
+    <li><a href="#close">Closing a session</a></li>
+    <li><a href="#report">Attendance list and corrections</a></li>
+    <li><a href="#archive">Archiving and deleting sessions</a></li>
+    <li><a href="#students">What students do</a></li>
+    <li><a href="#problems">Common problems</a></li>
+    {% if is_admin %}<li><a href="#admin">For administrators</a></li>{% endif %}
+  </ol>
+</nav>
+
+<article class="card help">
+  <h1>Teacher's manual</h1>
+
+  <h2 id="overview">1. How it works</h2>
+  <p>You start a session and show its QR code on the classroom screen. Students scan it with their phone camera
+    and sign in with their institution account. Each check-in records the student's name, email and time. It
+    appears on your screen straight away.</p>
+  <p>The QR code changes every {{ st.qr_interval }} seconds. A photo of the code sent to a friend outside the room
+    soon stops working, and students can't type in someone else's email.</p>
+
+  <h2 id="signin">2. Signing in</h2>
+  <ul>
+    <li>Click <b>Sign in</b> and choose <b>Continue with Google</b>.
+      {% if domains %}Use your <b>{{ domains }}</b> account only. Other accounts are refused.{% endif %}</li>
+    <li>You see the teacher dashboard if an administrator has added your address as a teacher. Otherwise you see a
+      student page: ask the administrator to add you, then reload the page.</li>
+    <li>Switch between <b>English</b> and <b>ไทย</b> at the top of any page.</li>
+  </ul>
+
+  <h2 id="gmail">3. Connecting Gmail</h2>
+  <p>Click <b>Connect Gmail</b> on the dashboard once and allow sending email. Check-in confirmations to students
+    and your attendance reports are then sent from your own address. You can disconnect at any time. This step is
+    shown only if the server is set up to send through Gmail.</p>
+
+  <h2 id="start">4. Starting a class session</h2>
+  <ol>
+    <li><b>Class name</b> is optional. Names you used before are suggested as you type.</li>
+    <li><b>Mid-class checks</b>: how many extra checks during class (0–3). You can add more while teaching.</li>
+    <li><b>Check-out at the end of class</b>: adds a final check. You can also add it later.</li>
+    <li><b>Email each student a confirmation</b> and <b>Email me the attendance list when I close the session</b>.</li>
+    <li>Click <b>Start and show QR code</b>. The check-in opens immediately.</li>
+  </ol>
+
+  <h2 id="display">5. The QR display</h2>
+  <ul>
+    <li>Put this page on the projector. Use <b>Full screen</b> or press <kbd>F</kbd>.</li>
+    <li>The bar under the code shows when it will change. A code scanned just before it changes still works.</li>
+    <li>The list on the right shows who has checked in, newest at the top, with the count in large numbers.</li>
+    <li><b>Pause</b> (or the <kbd>Space</kbd> bar) stops check-in immediately. The code is hidden and scans are
+      refused. <b>Resume</b> starts it again.</li>
+    <li>The dot near the bottom right is green while the screen is connected live. If it turns red, it reconnects
+      by itself. Reloading the page is always safe.</li>
+    <li><b>List</b> opens the attendance list in a new tab.</li>
+  </ul>
+
+  <h2 id="checks">6. Mid-class checks and check-out</h2>
+  <ul>
+    <li>The buttons at the top of the display show every check in the session and how many people are in each.</li>
+    <li>Click a check that hasn't started (or a closed one) to open it. <b>Opening a check closes the one before
+      it</b>, so only one check is open at a time.</li>
+    <li><b>+ Mid-class check</b> and <b>+ Check-out</b> add a new check and open it straight away. Check-out is
+      always kept last.</li>
+    <li>Students scan the same screen again for every check.</li>
+  </ul>
+
+  <h2 id="close">7. Closing a session</h2>
+  <p>Click <b>Close session</b> when class ends. Students can no longer check in. If you chose it, the attendance
+    list is emailed to you with a CSV file attached. You are taken to the attendance list.</p>
+
+  <h2 id="report">8. Attendance list and corrections</h2>
+  <ul>
+    <li>Open a session from the dashboard to see one row per student with their time for each check. A red dash
+      means they missed that check.</li>
+    <li><b>Download CSV</b> opens in Excel or Google Sheets, Thai names included. <b>Email me this list</b> sends it
+      again.</li>
+    <li><b>Corrections → Add by hand</b>: add a student who couldn't scan, for example a phone with a flat battery.
+      Choose which check to add them to.</li>
+    <li><b>Remove a check-in</b>: remove a mistaken entry.</li>
+  </ul>
+
+  <h2 id="archive">9. Archiving and deleting sessions</h2>
+  <ul>
+    <li>Click <b>…</b> next to a session on the dashboard.</li>
+    <li><b>Archive</b> hides it from <b>Your sessions</b> but keeps everything. Find it under <b>Archived</b> and use
+      <b>Unarchive</b> to bring it back. Archiving a running session closes it without sending the report email.</li>
+    <li><b>Delete</b> removes the session and all its check-ins permanently.</li>
+  </ul>
+
+  <h2 id="students">10. What students do</h2>
+  <ol>
+    <li>Open the phone camera and point it at the QR code, then tap the link.</li>
+    <li>The first time, sign in with Google{% if domains %} using their <b>{{ domains }}</b> account{% endif %}. The
+      phone remembers it, so later check-ins take a single scan.</li>
+    <li>A green tick with the time confirms the check-in. A confirmation email follows if you chose that.</li>
+  </ol>
+
+  <h2 id="problems">11. Common problems</h2>
+  <dl>
+    <dt>"QR code expired"</dt>
+    <dd>The student opened an old code, for example from a photo. Ask them to scan the screen again.</dd>
+    <dt>"Check-in is paused"</dt>
+    <dd>Check-in is paused. Click <b>Resume</b>.</dd>
+    <dt>"This check-in is closed"</dt>
+    <dd>Another check is now open, or the session is closed. Open the right check on the display, or add the
+      student by hand.</dd>
+    <dt>"Not in an allowed email domain" / "Account not allowed"</dt>
+    <dd>The student signed in with a personal account. They should sign out and use{% if domains %} their
+      <b>{{ domains }}</b> account{% else %} their institution account{% endif %}.</dd>
+    <dt>"Signing in took too long"</dt>
+    <dd>The scan is kept for 3 minutes while a student signs in. They should scan again.</dd>
+    <dt>A student has no phone</dt>
+    <dd>Add them by hand on the attendance list.</dd>
+  </dl>
+
+  {% if is_admin %}
+  <h2 id="admin">12. For administrators</h2>
+  <p><b>Settings</b> (top right) controls the institution name, logos, accent colour, default language, allowed
+    student email domains, teachers (by domain or one by one), time zone, how often the QR code changes, and
+    whether new sessions email students and teachers by default. Changes take effect immediately.</p>
+  {% endif %}
+</article>

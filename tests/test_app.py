@@ -327,3 +327,11 @@ def test_adds_missing_columns(tmp_path):
     Database(db_file)
     cols = {r[1] for r in sqlite3.connect(db_file).execute("pragma table_info(sessions)")}
     assert "archived_at" in cols
+
+
+def test_help_page_in_both_languages(app):
+    c = client(app)
+    r = c.get("/attendance/help")
+    assert r.status_code == 200 and "Teacher's manual" in r.text and "students.uni.example" in r.text
+    r = c.get("/attendance/lang/th?next=/attendance/help")
+    assert "คู่มือสำหรับอาจารย์" in r.text
