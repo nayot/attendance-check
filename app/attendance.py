@@ -250,6 +250,9 @@ def roster(sess: ClassSession) -> tuple[list[Phase], list[dict]]:
             row["name"] = row["name"] or c.name
             row["times"][p.id] = c.created_at
     rows = sorted(people.values(), key=lambda r: min(r["times"].values()))
+    for r in rows:
+        # e.g. "2/3": checks attended out of the checks held in this session
+        r["attended"] = f"{len(r['times'])}/{len(phases)}"
     return phases, rows
 
 
@@ -258,10 +261,12 @@ def report_csv(sess: ClassSession, st: Settings) -> str:
     out = io.StringIO()
     w = csv.writer(out)
     _ = i18n.translator(st.default_language)
-    w.writerow(["No.", _("Name"), _("Email")] + [i18n.phase_label(p.label, st.default_language) for p in phases])
+    w.writerow(["No.", _("Name"), _("Email")] + [i18n.phase_label(p.label, st.default_language) for p in phases]
+               + [_("Checks")])
     date_fmt = "%Y-%m-%d %H:%M:%S"
     for i, r in enumerate(rows, 1):
-        w.writerow([i, r["name"], r["email"]] + [format_local(r["times"].get(p.id), st, date_fmt) for p in phases])
+        w.writerow([i, r["name"], r["email"]] + [format_local(r["times"].get(p.id), st, date_fmt) for p in phases]
+                   + [r["attended"]])
     return "﻿" + out.getvalue()  # BOM so Excel opens UTF-8 (e.g. Thai names) correctly
 
 

@@ -339,3 +339,28 @@ def test_help_page_in_both_languages(app):
     assert r.status_code == 200 and "Teacher's manual" in r.text and "students.uni.example" in r.text
     r = c.get("/attendance/lang/th?next=/attendance/help")
     assert "คู่มือสำหรับอาจารย์" in r.text
+
+
+def test_report_table_with_several_checks(app):
+    from app import attendance as att
+    svc = app.state.svc
+    st = svc.settings()
+    sid = att.create_session(svc, TEACHER, "Circuits", 2, True, True, False)
+    ids = [p.id for p in att.load_session(svc, sid).phases]  # in, mid 1, mid 2, out
+    att.check_in(svc, st, ids[0], "a@students.uni.example", "A")
+    att.check_in(svc, st, ids[0], "b@students.uni.example", "B")
+    att.set_phase_state(svc, sid, ids[1], "open")
+    att.check_in(svc, st, ids[1], "a@students.uni.example", "A")
+    att.set_phase_state(svc, sid, ids[3], "open")
+    att.check_in(svc, st, ids[3], "a@students.uni.example", "A")
+    att.check_in(svc, st, ids[3], "c@students.uni.example", "C")
+    att.send_report_email(svc, sid, TEACHER)
+    text = svc.mailer.sent[-1].get_body(("plain",)).get_content()
+    # Mid-class check 2 was never opened, so it has no column.
+    assert "| # | Name | Email | Check-in | Mid-class check 1 | Check-out | Checks |" in text
+    rows = [line for line in text.splitlines() if line.startswith("| ") and "@" in line]
+    assert rows[0].startswith("| 1 | A | a@students.uni.example |") and rows[0].endswith("| 3/3 |")
+    assert rows[1].endswith("| - | - | 1/3 |") and rows[2].endswith("| 1/3 |")
+    assert "| - | - |" in rows[2]
+    csv_text = att.report_csv(att.load_session(svc, sid), st)
+    assert csv_text.splitlines()[0].endswith("Check-out,Checks")

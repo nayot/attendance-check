@@ -27,16 +27,17 @@
   <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>#</th><th>{{ _("Name") }}</th><th>{{ _("Email") }}</th>{% for p in phases %}<th>{{ phase_label(p.label) }}</th>{% endfor %}</tr>
+        <tr><th>#</th><th>{{ _("Name") }}</th><th>{{ _("Email") }}</th>{% for p in phases %}<th>{{ phase_label(p.label) }}</th>{% endfor %}<th>{{ _("Checks") }}</th></tr>
       </thead>
       <tbody>
         {% for r in rows %}
         <tr>
           <td>{{ loop.index }}</td><td>{{ r.name }}</td><td>{{ r.email }}</td>
           {% for p in phases %}<td class="{{ '' if p.id in r.times else 'missing' }}">{{ local(r.times.get(p.id)) or '—' }}</td>{% endfor %}
+          <td class="{{ 'missing' if r.times | length < phases | length }}"><strong>{{ r.attended }}</strong></td>
         </tr>
         {% else %}
-        <tr><td colspan="{{ 3 + phases | length }}" class="muted">{{ _("Nobody has checked in yet.") }}</td></tr>
+        <tr><td colspan="{{ 4 + phases | length }}" class="muted">{{ _("Nobody has checked in yet.") }}</td></tr>
         {% endfor %}
       </tbody>
     </table>

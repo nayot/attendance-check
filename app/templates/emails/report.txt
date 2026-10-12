@@ -4,8 +4,8 @@
 {% for p in phases %}{{ phase_label(p.label) }}: {{ p.checkins | length }}
 {% endfor %}{{ _("Students in total") }}: {{ rows | length }}
 
-| # | {{ _("Name") }} | {{ _("Email") }} |{% for p in phases %} {{ phase_label(p.label) }} |{% endfor %}
-|---|---|---|{% for p in phases %}---|{% endfor %}
-{% for r in rows %}| {{ loop.index }} | {{ r.name | replace("|", "/") }} | {{ r.email }} |{% for p in phases %} {{ local(r.times.get(p.id)) or "-" }} |{% endfor %}
+| # | {{ _("Name") }} | {{ _("Email") }} |{% for p in phases %} {{ phase_label(p.label) }} |{% endfor %} {{ _("Checks") }} |
+|---|---|---|{% for p in phases %}---|{% endfor %}---|
+{% for r in rows %}| {{ loop.index }} | {{ r.name | replace("|", "/") }} | {{ r.email }} |{% for p in phases %} {{ local(r.times.get(p.id)) or "-" }} |{% endfor %} {{ r.attended }} |
 {% endfor %}
 {{ _("View it online") }}: {{ report_url }}

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 — 2026-10-12
+
+- Attendance tables (report email, report page and CSV) have one column per check held (check-in, each
+  mid-class check, check-out) plus a **Checks** column such as `2/3`, highlighted when a student missed one.
+  Checks that were planned but never opened get no column.
+
 ## 0.1.1 — 2026-10-12
 
 - The attendance report email has the list as a table in the message body (HTML table plus a plain-text

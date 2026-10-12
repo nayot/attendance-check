@@ -8,12 +8,13 @@
 </p>
 <table cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:13px;">
   <tr style="background:#f4f5f7;text-align:left;">
-    <th>#</th><th>{{ _("Name") }}</th><th>{{ _("Email") }}</th>{% for p in phases %}<th>{{ phase_label(p.label) }}</th>{% endfor %}
+    <th>#</th><th>{{ _("Name") }}</th><th>{{ _("Email") }}</th>{% for p in phases %}<th>{{ phase_label(p.label) }}</th>{% endfor %}<th>{{ _("Checks") }}</th>
   </tr>
   {% for r in rows %}
   <tr style="border-top:1px solid #e3e6eb;">
     <td>{{ loop.index }}</td><td>{{ r.name }}</td><td>{{ r.email }}</td>
     {% for p in phases %}<td>{{ local(r.times.get(p.id)) or '—' }}</td>{% endfor %}
+    <td style="{{ 'color:#b42318;font-weight:bold;' if r.times | length < phases | length }}">{{ r.attended }}</td>
   </tr>
   {% endfor %}
 </table>

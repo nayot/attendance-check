@@ -142,6 +142,7 @@ TH = {
     "The attendance list is on its way to {email}.": "กำลังส่งรายชื่อผู้เข้าเรียนไปที่ {email}",
     "students in total": "คนทั้งหมด",
     "Name": "ชื่อ",
+    "Checks": "จำนวนครั้ง",
     "Nobody has checked in yet.": "ยังไม่มีใครเช็คชื่อ",
     "Corrections": "แก้ไขรายชื่อ",
     "student email": "อีเมลนักศึกษา",
