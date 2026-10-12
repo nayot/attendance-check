@@ -5,6 +5,8 @@
   const sid = app.dataset.session;
   const csrf = app.dataset.csrf;
   const $ = (id) => document.getElementById(id);
+  const t = (key, params = {}) =>
+    (window.I18N[key] ?? key).replace(/\{(\w+)\}/g, (m, name) => params[name] ?? m);
 
   let state = null;      // session state from /state
   let viewPhase = null;  // phase whose list is shown
@@ -44,13 +46,13 @@
       b.innerHTML = `<span></span><b></b><em></em>`;
       b.children[0].textContent = p.label;
       b.children[1].textContent = p.count;
-      b.children[2].textContent = { pending: "not started", open: "open", paused: "paused", closed: "closed" }[p.state];
-      b.title = p.state === "open" || p.state === "paused" ? "Showing this check" : "Click to open this check";
+      b.children[2].textContent = t({ pending: "not started", open: "open", paused: "paused", closed: "closed" }[p.state]);
+      b.title = t(p.state === "open" || p.state === "paused" ? "Showing this check" : "Click to open this check");
       b.onclick = () => {
         if (p.state === "pending" || p.state === "closed") {
-          const verb = p.state === "closed" ? "Reopen" : "Start";
-          const note = active ? ` This closes "${active.label}".` : "";
-          if (!confirm(`${verb} "${p.label}"?${note}`)) return;
+          const ask = t(p.state === "closed" ? 'Reopen "{label}"?' : 'Start "{label}"?', { label: p.label });
+          const note = active ? " " + t('This closes "{label}".', { label: active.label }) : "";
+          if (!confirm(ask + note)) return;
           post(`/sessions/${sid}/phases/${p.id}/open`);
         } else {
           viewPhase = p.id;
@@ -63,20 +65,20 @@
     // Pause / resume
     const pause = $("btn-pause");
     pause.disabled = !active;
-    pause.textContent = active && active.state === "paused" ? "▶ Resume" : "❚❚ Pause";
+    pause.textContent = active && active.state === "paused" ? "▶ " + t("Resume") : "❚❚ " + t("Pause");
     pause.classList.toggle("warn", !!active && active.state === "paused");
 
     $("btn-checkout").hidden = state.phases.some((p) => p.kind === "checkout");
 
     // QR area
     const overlay = $("qr-overlay");
-    $("qr-label").textContent = active ? active.label : "No check open";
+    $("qr-label").textContent = active ? active.label : t("No check open");
     if (!active) {
       overlay.hidden = false;
-      overlay.textContent = "Choose a check above to open it";
+      overlay.textContent = t("Choose a check above to open it");
     } else if (active.state === "paused") {
       overlay.hidden = false;
-      overlay.textContent = "Paused";
+      overlay.textContent = t("Paused");
     } else {
       overlay.hidden = true;
     }
@@ -85,7 +87,7 @@
 
     // Running list
     const p = phase(viewPhase);
-    $("list-title").textContent = p ? p.label : "Checked in";
+    $("list-title").textContent = p ? p.label : t("Checked in");
     $("count").textContent = p ? p.count : 0;
     $("list").replaceChildren(...(p ? p.checkins.map(row) : []));
   }
@@ -140,11 +142,11 @@
     post(`/sessions/${sid}/phases/${active.id}/${active.state === "paused" ? "resume" : "pause"}`);
   };
   $("btn-mid").onclick = () => {
-    if (confirm("Add a mid-class check and open it now?"))
+    if (confirm(t("Add a mid-class check and open it now?")))
       post(`/sessions/${sid}/phases`, { kind: "mid", open_now: "true" });
   };
   $("btn-checkout").onclick = () => {
-    if (confirm("Add a check-out and open it now?"))
+    if (confirm(t("Add a check-out and open it now?")))
       post(`/sessions/${sid}/phases`, { kind: "checkout", open_now: "true" });
   };
   $("btn-full").onclick = () => {
@@ -152,7 +154,7 @@
     else document.documentElement.requestFullscreen();
   };
   $("close-form").onsubmit = (e) => {
-    if (!confirm("Close this session? Students can no longer check in.")) e.preventDefault();
+    if (!confirm(t("Close this session? Students can no longer check in."))) e.preventDefault();
   };
   document.addEventListener("keydown", (e) => {
     if (e.target.tagName === "INPUT") return;

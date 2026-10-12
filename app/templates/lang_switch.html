@@ -1,0 +1,7 @@
+<span class="lang-switch" aria-label="{{ _('Language') }}">
+  {%- for code, label in languages.items() -%}
+  {%- if not loop.first %} | {% endif -%}
+  {%- if code == lang %}<strong>{{ label }}</strong>
+  {%- else %}<a href="{{ url('/lang/' ~ code) }}?next={{ here | urlencode }}" lang="{{ code }}">{{ label }}</a>{% endif -%}
+  {%- endfor -%}
+</span>

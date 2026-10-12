@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ lang }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -18,13 +18,14 @@
         <strong>{{ st.app_title }}</strong>
       </span>
     </a>
-    {% if user %}
     <nav>
-      {% if is_admin %}<a href="{{ url('/admin/settings') }}">Settings</a>{% endif %}
+      {% include "lang_switch.html" %}
+      {% if user %}
+      {% if is_admin %}<a href="{{ url('/admin/settings') }}">{{ _("Settings") }}</a>{% endif %}
       <span class="who" title="{{ user.email }}">{{ user.name or user.email }}</span>
-      <a href="{{ url('/logout') }}">Sign out</a>
+      <a href="{{ url('/logout') }}">{{ _("Sign out") }}</a>
+      {% endif %}
     </nav>
-    {% endif %}
   </header>
   {% endblock %}
   <main class="{% block main_class %}page{% endblock %}">

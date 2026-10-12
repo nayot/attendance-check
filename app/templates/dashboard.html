@@ -1,57 +1,57 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}{{ _("Dashboard") }}{% endblock %}
 {% block content %}
 {% if gmail_enabled %}
 <section class="card gmail-card">
   {% if gmail_connected %}
-  <p>✓ Emails to your students and your attendance reports are sent from <strong>{{ user.email }}</strong>.</p>
+  <p>✓ {{ _("Emails to your students and your attendance reports are sent from") }} <strong>{{ user.email }}</strong></p>
   <form method="post" action="{{ url('/gmail/disconnect') }}">
     <input type="hidden" name="csrf" value="{{ csrf }}">
-    <button type="submit" class="secondary small">Disconnect Gmail</button>
+    <button type="submit" class="secondary small">{{ _("Disconnect Gmail") }}</button>
   </form>
   {% else %}
-  <p><strong>Connect your Gmail</strong> so check-in confirmations and attendance reports are sent from your own address.
-    Until then, {{ 'they are sent from the app\'s address' if smtp_configured else 'no emails are sent' }}.</p>
-  <a class="button" href="{{ url('/gmail/connect') }}">Connect Gmail</a>
+  <p><strong>{{ _("Connect your Gmail") }}</strong> {{ _("so check-in confirmations and attendance reports are sent from your own address.") }}
+    {{ _("Until then, they are sent from the app's address.") if smtp_configured else _("Until then, no emails are sent.") }}</p>
+  <a class="button" href="{{ url('/gmail/connect') }}">{{ _("Connect Gmail") }}</a>
   {% endif %}
 </section>
 {% endif %}
 <div class="grid-2">
   <section class="card">
-    <h1>Start a class session</h1>
+    <h1>{{ _("Start a class session") }}</h1>
     <form method="post" action="{{ url('/sessions') }}" class="stack">
       <input type="hidden" name="csrf" value="{{ csrf }}">
-      <label><span>Class name <span class="muted">(optional)</span></span>
-        <input name="class_name" list="class-names" maxlength="200" placeholder="e.g. Circuit Analysis, Sec 01">
+      <label><span>{{ _("Class name") }} <span class="muted">{{ _("(optional)") }}</span></span>
+        <input name="class_name" list="class-names" maxlength="200" placeholder="{{ _('e.g. Circuit Analysis, Sec 01') }}">
         <datalist id="class-names">{% for n in class_names %}<option value="{{ n }}">{% endfor %}</datalist>
       </label>
-      <label>Mid-class checks
+      <label>{{ _("Mid-class checks") }}
         <select name="mid_checks">
           {% for n in range(0, 4) %}<option value="{{ n }}">{{ n }}</option>{% endfor %}
         </select>
       </label>
-      <label class="check"><input type="checkbox" name="checkout" value="true"> Check-out at the end of class</label>
+      <label class="check"><input type="checkbox" name="checkout" value="true"> {{ _("Check-out at the end of class") }}</label>
       <label class="check"><input type="checkbox" name="email_students" value="true" {% if st.student_emails_default %}checked{% endif %}>
-        Email each student a confirmation</label>
+        {{ _("Email each student a confirmation") }}</label>
       <label class="check"><input type="checkbox" name="email_report" value="true" {% if st.report_email_default %}checked{% endif %}>
-        Email me the attendance list when I close the session</label>
-      <p class="muted small">You can add mid-class checks and a check-out while the class is running.</p>
-      <button type="submit" class="large">Start and show QR code</button>
+        {{ _("Email me the attendance list when I close the session") }}</label>
+      <p class="muted small">{{ _("You can add mid-class checks and a check-out while the class is running.") }}</p>
+      <button type="submit" class="large">{{ _("Start and show QR code") }}</button>
     </form>
   </section>
 
   <section class="card">
-    <h2>Your sessions</h2>
-    {% if not sessions %}<p class="muted">No sessions yet.</p>{% endif %}
+    <h2>{{ _("Your sessions") }}</h2>
+    {% if not sessions %}<p class="muted">{{ _("No sessions yet.") }}</p>{% endif %}
     <ul class="session-list">
       {% for s in sessions %}
       <li>
         <a href="{{ url('/sessions/' ~ s.id ~ ('/report' if s.is_closed else '')) }}">
-          <strong>{{ s.class_name or 'Class session' }}</strong>
+          <strong>{{ s.class_name or _("Class session") }}</strong>
           <span class="muted">{{ local(s.created_at, '%d %b %Y, %H:%M') }}</span>
         </a>
-        <span class="pill {{ 'closed' if s.is_closed else 'open' }}">{{ 'closed' if s.is_closed else 'running' }}</span>
-        <span class="muted small">{{ s.counts | join(' / ') }} checked in</span>
+        <span class="pill {{ 'closed' if s.is_closed else 'open' }}">{{ _("closed") if s.is_closed else _("running") }}</span>
+        <span class="muted small">{{ s.counts | join(' / ') }} {{ _("checked in") }}</span>
       </li>
       {% endfor %}
     </ul>

@@ -12,9 +12,10 @@ from fastapi.responses import JSONResponse, RedirectResponse, Response, Streamin
 from sqlalchemy import select
 
 from . import attendance as att
+from . import i18n
 from .db import ClassSession
 from .routes_auth import EMAIL_RE
-from .web import check_csrf, render, require_teacher, svc
+from .web import check_csrf, language, render, require_teacher, svc
 
 router = APIRouter()
 
@@ -72,14 +73,15 @@ def display(request: Request, session_id: int, user: dict = Depends(require_teac
     sess = own_session(request, session_id, user)
     if sess.is_closed:
         return RedirectResponse(svc(request).url(f"/sessions/{session_id}/report"), status_code=303)
-    return render(request, "display.html", sess=sess, title=att.session_title(sess))
+    return render(request, "display.html", sess=sess, title=att.session_title(sess, language(request)),
+                  display_strings=i18n.DISPLAY_STRINGS)
 
 
 @router.get("/sessions/{session_id}/state")
 def state(request: Request, session_id: int, user: dict = Depends(require_teacher)):
     s = svc(request)
     sess = own_session(request, session_id, user)
-    return JSONResponse(att.session_state(s, sess, s.settings()))
+    return JSONResponse(att.session_state(s, sess, s.settings(), language(request)))
 
 
 def qr_payload(request: Request, phase_id: int, interval: int) -> dict:
@@ -173,7 +175,7 @@ def session_close(request: Request, session_id: int, user: dict = Depends(requir
 def report(request: Request, session_id: int, user: dict = Depends(require_teacher)):
     sess = own_session(request, session_id, user)
     phases, rows = att.roster(sess)
-    return render(request, "report.html", sess=sess, title=att.session_title(sess), phases=phases,
+    return render(request, "report.html", sess=sess, title=att.session_title(sess, language(request)), phases=phases,
                   rows=rows, all_phases=sess.phases)
 
 

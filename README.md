@@ -11,6 +11,8 @@ A small self-hosted web app that lets teachers take class attendance with a rota
 - Each student gets a confirmation email, sent from the teacher's own Gmail / Google Workspace address
   (or from a shared SMTP account). When the session closes, the teacher gets the list by email with a
   CSV file attached. The list can also be downloaded or corrected by hand.
+- English and Thai interface. Everyone can switch language in the header, and the admin picks the default,
+  which is also used for emails.
 - Settings for the institution name, logos, accent colour, allowed student email domains, teacher allowlist,
   time zone and QR interval. Nothing is tied to one institution.
 
@@ -119,11 +121,12 @@ edited on the **Settings** page by an administrator:
 | Logos | Up to 4 images. The first PNG/JPEG is also embedded in emails |
 | Student email domains | e.g. `students.example.edu, *.example.edu`. Empty allows any verified email |
 | Teacher domains / emails | Who may start sessions. Admins always can |
+| Default language | English or Thai, for new visitors and for emails. Thai dates use Buddhist-era years |
 | Time zone | Used for every time shown, emailed or exported |
 | QR interval | Seconds between code changes (5–120). A scanned code is accepted for up to two intervals |
 | Email defaults | Whether new sessions email students and the teacher |
 
-`INSTITUTION_NAME`, `STUDENT_DOMAINS`, `TEACHER_DOMAINS`, `TEACHER_EMAILS` and `TIMEZONE` in the environment
+`INSTITUTION_NAME`, `STUDENT_DOMAINS`, `TEACHER_DOMAINS`, `TEACHER_EMAILS`, `TIMEZONE` and `DEFAULT_LANGUAGE` in the environment
 set the starting values on first run.
 
 ## Using it in class
@@ -138,6 +141,12 @@ set the starting values on first run.
 
 On the report page you can download the CSV, email it to yourself again, add a student by hand or remove a
 mistaken check-in.
+
+## Adding a language
+
+Interface text is written in English and translated through the catalogs in [`app/i18n.py`](app/i18n.py).
+To add a language, copy the `TH` dictionary, translate the values and register it in `CATALOGS` and `LANGUAGES`.
+`tests/test_i18n.py` checks that every string shown in the UI has a translation.
 
 ## Development
 

@@ -1,10 +1,10 @@
 {% extends "emails/layout.html" %}
 {% block body %}
-<p>Hello {{ name or 'there' }},</p>
+<p>{{ _("Hello {name},", name=name) if name else _("Hello,") }}</p>
 <p style="font-size:18px;margin:20px 0;">
-  <span style="color:#16794a;font-weight:bold;">&#10003; {{ phase }} recorded</span><br>
+  <span style="color:#16794a;font-weight:bold;">&#10003; {{ _("{phase} recorded", phase=phase) }}</span><br>
   <strong>{{ title }}</strong><br>
   {{ time }} <span style="color:#666;">({{ timezone }})</span>
 </p>
-<p style="color:#666;">If this wasn't you, tell your teacher.</p>
+<p style="color:#666;">{{ _("If this wasn't you, tell your teacher.") }}</p>
 {% endblock %}

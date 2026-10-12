@@ -16,7 +16,7 @@
     <div class="clock" id="clock"></div>
   </header>
 
-  <nav class="phases" id="phases" aria-label="Checks in this session"></nav>
+  <nav class="phases" id="phases" aria-label="{{ _('Checks in this session') }}"></nav>
 
   <section class="stage">
     <div class="qr-panel">
@@ -26,12 +26,12 @@
         <div class="qr-overlay" id="qr-overlay" hidden></div>
       </div>
       <div class="qr-timer" id="qr-timer"><div id="qr-timer-bar"></div></div>
-      <p class="qr-hint">Scan with your phone camera to check in</p>
+      <p class="qr-hint">{{ _("Scan with your phone camera to check in") }}</p>
     </div>
 
     <div class="list-panel">
       <div class="list-head">
-        <h2 id="list-title">Checked in</h2>
+        <h2 id="list-title">{{ _("Checked in") }}</h2>
         <div class="count" id="count">0</div>
       </div>
       <ol class="live-list" id="list"></ol>
@@ -39,21 +39,29 @@
   </section>
 
   <footer class="toolbar">
-    <button id="btn-pause" class="large">Pause</button>
-    <button id="btn-mid" class="secondary">+ Mid-class check</button>
-    <button id="btn-checkout" class="secondary">+ Check-out</button>
-    <button id="btn-full" class="secondary" title="Full screen">⛶ Full screen</button>
+    <button id="btn-pause" class="large">{{ _("Pause") }}</button>
+    <button id="btn-mid" class="secondary">{{ _("+ Mid-class check") }}</button>
+    <button id="btn-checkout" class="secondary">{{ _("+ Check-out") }}</button>
+    <button id="btn-full" class="secondary" title="{{ _('Full screen') }}">⛶ {{ _("Full screen") }}</button>
     <span class="spacer"></span>
-    <span class="conn" id="conn" title="Live connection"></span>
-    <a class="button secondary" href="{{ url('/sessions/' ~ sess.id ~ '/report') }}" target="_blank">List</a>
+    {% include "lang_switch.html" %}
+    <span class="conn" id="conn" title="{{ _('Live connection') }}"></span>
+    <a class="button secondary" href="{{ url('/sessions/' ~ sess.id ~ '/report') }}" target="_blank">{{ _("List") }}</a>
     <form method="post" action="{{ url('/sessions/' ~ sess.id ~ '/close') }}" id="close-form">
       <input type="hidden" name="csrf" value="{{ csrf }}">
-      <button type="submit" class="danger">Close session</button>
+      <button type="submit" class="danger">{{ _("Close session") }}</button>
     </form>
   </footer>
 </div>
 {% endblock %}
 {% block scripts %}
-<script>window.TZ = {{ st.timezone | tojson }};</script>
+<script>
+  window.TZ = {{ st.timezone | tojson }};
+  window.I18N = {
+    {%- for key in display_strings %}
+    {{ key | tojson }}: {{ _(key) | tojson }},
+    {%- endfor %}
+  };
+</script>
 <script src="{{ url('/static/display.js') }}"></script>
 {% endblock %}

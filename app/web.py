@@ -9,6 +9,7 @@ from urllib.parse import quote
 from fastapi import HTTPException, Request
 from fastapi.templating import Jinja2Templates
 
+from . import i18n
 from . import settings as settings_mod
 from .config import Config
 from .db import Database
@@ -121,11 +122,24 @@ def safe_next(request: Request, value: str | None) -> str:
     return s.url("/")
 
 
+def language(request: Request, st: settings_mod.Settings | None = None) -> str:
+    chosen = request.session.get("lang")
+    if chosen:
+        return i18n.normalize(chosen)
+    return (st or svc(request).settings()).default_language
+
+
 def render(request: Request, name: str, status_code: int = 200, **context):
     s = svc(request)
     st = s.settings()
     user = current_user(request)
+    lang = language(request, st)
     context.update(
+        lang=lang,
+        languages=i18n.LANGUAGES,
+        _=i18n.translator(lang),
+        phase_label=lambda label: i18n.phase_label(label, lang),
+        here=request.url.path + ("?" + request.url.query if request.url.query else ""),
         request=request,
         st=st,
         user=user,
@@ -133,12 +147,12 @@ def render(request: Request, name: str, status_code: int = 200, **context):
         is_admin=s.is_admin(user["email"]) if user else False,
         csrf=csrf_token(request),
         url=s.url,
-        local=lambda dt, fmt="%H:%M:%S": format_local(dt, st, fmt),
+        local=lambda dt, fmt="%H:%M:%S": format_local(dt, st, fmt, lang),
     )
     return TEMPLATES.TemplateResponse(request, name, context, status_code=status_code)
 
 
-def format_local(dt: datetime | None, st: settings_mod.Settings, fmt: str = "%H:%M:%S") -> str:
+def format_local(dt: datetime | None, st: settings_mod.Settings, fmt: str = "%H:%M:%S", lang: str = "en") -> str:
     if dt is None:
         return ""
-    return dt.astimezone(st.tz).strftime(fmt)
+    return i18n.strftime(dt.astimezone(st.tz), fmt, lang)

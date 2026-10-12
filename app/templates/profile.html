@@ -1,18 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Your name{% endblock %}
+{% block title %}{{ _("Your name") }}{% endblock %}
 {% block main_class %}page narrow{% endblock %}
 {% block content %}
 <section class="card">
-  <h1>Your name</h1>
-  <p class="muted">Shown on the attendance list next to {{ user.email }}.</p>
-  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <h1>{{ _("Your name") }}</h1>
+  <p class="muted">{{ _("Shown on the attendance list next to {email}.", email=user.email) }}</p>
+  {% if error %}<p class="error">{{ _(error) }}</p>{% endif %}
   <form method="post" action="{{ url('/profile') }}" class="stack">
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <input type="hidden" name="next" value="{{ next }}">
-    <label>Full name
+    <label>{{ _("Full name") }}
       <input name="name" value="{{ user.name or '' }}" required autofocus autocomplete="name" maxlength="200">
     </label>
-    <button type="submit">Continue</button>
+    <button type="submit">{{ _("Continue") }}</button>
   </form>
 </section>
 {% endblock %}

@@ -3,7 +3,7 @@
 import csv
 import io
 import mimetypes
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
+from . import i18n
 from .db import CheckIn, ClassSession, Phase, User, utcnow
 from .settings import Settings
 from .web import Services, format_local
@@ -136,6 +137,7 @@ class CheckInResult:
     phase: Phase | None = None
     session: ClassSession | None = None
     duplicate: bool = False
+    params: dict = field(default_factory=dict)  # for formatting the translated message
 
 
 def check_in(svc: Services, st: Settings, phase_id: int, email: str, name: str,
@@ -153,7 +155,8 @@ def check_in(svc: Services, st: Settings, phase_id: int, email: str, name: str,
                 else "This check-in is closed."
             return CheckInResult(False, msg, phase=phase, session=sess)
         if not manual and not st.student_allowed(email):
-            return CheckInResult(False, f"{email} is not in an allowed email domain.", phase=phase, session=sess)
+            return CheckInResult(False, "{email} is not in an allowed email domain.", phase=phase, session=sess,
+                                 params={"email": email})
         existing = db.scalar(select(CheckIn).where(CheckIn.phase_id == phase_id, CheckIn.email == email))
         if existing is not None:
             return CheckInResult(True, "You have already checked in.", existing, phase, sess, duplicate=True)
@@ -191,20 +194,20 @@ def checkin_json(c: CheckIn, st: Settings) -> dict:
             "time": format_local(c.created_at, st)}
 
 
-def session_title(sess: ClassSession) -> str:
-    return sess.class_name or "Class session"
+def session_title(sess: ClassSession, lang: str = "en") -> str:
+    return sess.class_name or i18n.gettext(lang, "Class session")
 
 
-def session_state(svc: Services, sess: ClassSession, st: Settings) -> dict:
+def session_state(svc: Services, sess: ClassSession, st: Settings, lang: str = "en") -> dict:
     active = sess.active_phase
     return {
         "id": sess.id,
-        "title": session_title(sess),
+        "title": session_title(sess, lang),
         "closed": sess.is_closed,
         "active_phase": active.id if active else None,
         "phases": [
             {
-                "id": p.id, "kind": p.kind, "label": p.label, "state": p.state,
+                "id": p.id, "kind": p.kind, "label": i18n.phase_label(p.label, lang), "state": p.state,
                 "count": len(p.checkins),
                 "checkins": [checkin_json(c, st) for c in reversed(p.checkins)],
             }
@@ -230,7 +233,8 @@ def report_csv(sess: ClassSession, st: Settings) -> str:
     phases, rows = roster(sess)
     out = io.StringIO()
     w = csv.writer(out)
-    w.writerow(["No.", "Name", "Email"] + [p.label for p in phases])
+    _ = i18n.translator(st.default_language)
+    w.writerow(["No.", _("Name"), _("Email")] + [i18n.phase_label(p.label, st.default_language) for p in phases])
     date_fmt = "%Y-%m-%d %H:%M:%S"
     for i, r in enumerate(rows, 1):
         w.writerow([i, r["name"], r["email"]] + [format_local(r["times"].get(p.id), st, date_fmt) for p in phases])
@@ -255,7 +259,9 @@ def _logo(svc: Services, st: Settings) -> tuple[str, bytes] | None:
 def _email(svc: Services, st: Settings, to: str, subject: str, template: str, attachments=(),
            teacher: str | None = None, **ctx) -> None:
     logo = _logo(svc, st)
-    ctx.update(st=st, has_logo=logo is not None, app_url=svc.absolute("/"))
+    lang = st.default_language
+    ctx.update(st=st, has_logo=logo is not None, app_url=svc.absolute("/"), lang=lang,
+               _=i18n.translator(lang), phase_label=lambda label: i18n.phase_label(label, lang))
     html = EMAILS.get_template(f"emails/{template}.html").render(**ctx)
     text = EMAILS.get_template(f"emails/{template}.txt").render(**ctx)
     sender_name = st.institution_name or st.app_title
@@ -272,12 +278,14 @@ def teacher_name(svc: Services, email: str) -> str:
 
 
 def send_student_email(svc: Services, st: Settings, r: CheckInResult) -> None:
-    title = session_title(r.session)
+    lang = st.default_language
+    title = session_title(r.session, lang)
+    phase = i18n.phase_label(r.phase.label, lang)
     _email(
-        svc, st, r.checkin.email, f"{r.phase.label} confirmed: {title}", "student",
+        svc, st, r.checkin.email, i18n.gettext(lang, "{phase} confirmed: {title}", phase=phase, title=title), "student",
         teacher=r.session.teacher_email,
-        name=r.checkin.name, title=title, phase=r.phase.label,
-        time=format_local(r.checkin.created_at, st, "%d %b %Y, %H:%M:%S"),
+        name=r.checkin.name, title=title, phase=phase,
+        time=format_local(r.checkin.created_at, st, "%d %b %Y, %H:%M:%S", lang),
         timezone=st.timezone,
     )
 
@@ -286,13 +294,15 @@ def send_report_email(svc: Services, session_id: int, to: str) -> None:
     st = svc.settings()
     sess = load_session(svc, session_id)
     phases, rows = roster(sess)
-    title = session_title(sess)
+    lang = st.default_language
+    title = session_title(sess, lang)
+    date = format_local(sess.created_at, st, "%d %b %Y", lang)
     _email(
-        svc, st, to, f"Attendance report: {title} ({format_local(sess.created_at, st, '%d %b %Y')})", "report",
+        svc, st, to, i18n.gettext(lang, "Attendance report: {title} ({date})", title=title, date=date), "report",
         attachments=[(report_filename(sess, st), "text/csv", report_csv(sess, st).encode("utf-8"))],
         teacher=sess.teacher_email,
         title=title, sess=sess, phases=phases, rows=rows,
-        date=format_local(sess.created_at, st, "%d %b %Y, %H:%M"),
+        date=format_local(sess.created_at, st, "%d %b %Y, %H:%M", lang),
         local=lambda dt: format_local(dt, st, "%H:%M:%S"),
         report_url=svc.absolute(f"/sessions/{sess.id}/report"),
     )

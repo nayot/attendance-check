@@ -13,6 +13,7 @@ from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
 
+from . import i18n
 from .db import LoginCode, Phase, User, utcnow
 from .gmail import SCOPE as GMAIL_SCOPE
 from .web import check_csrf, current_user, render, require_teacher, safe_next, svc
@@ -132,7 +133,8 @@ async def auth_callback(request: Request, provider: str):
                       text="Your account did not provide a verified email address.")
     if not may_sign_in(request, email):
         return render(request, "message.html", 403, title="Account not allowed",
-                      text=f"{email} is not in an allowed email domain. Sign in with your institution account.")
+                      text="{email} is not in an allowed email domain. Sign in with your institution account.",
+                      params={"email": email})
     return finish_login(request, email, info.get("name") or "")
 
 
@@ -157,7 +159,7 @@ def finish_gmail_connect(request: Request, email: str, token: dict):
     user = current_user(request)
     if not user or email != user["email"]:
         return render(request, "message.html", 400, title="Wrong Google account",
-                      text=f"Choose {user['email'] if user else 'your own account'} when Google asks.")
+                      text="Choose {email} when Google asks.", params={"email": user["email"] if user else ""})
     if GMAIL_SCOPE not in token.get("scope", "").split() or not token.get("refresh_token"):
         return render(request, "message.html", 400, title="Gmail not connected",
                       text="Google did not grant permission to send email. Try again and tick the Gmail box.")
@@ -190,7 +192,8 @@ def send_code(request: Request, email: str = Form(...)):
     if not may_sign_in(request, email):
         st = s.settings()
         return render(request, "login.html", 403, providers=s.config.providers, otp_enabled=True,
-                      error="Use your institution email (" + ", ".join(st.student_domains) + ").", email=email)
+                      error="Use your institution email ({domains}).", email=email,
+                      params={"domains": ", ".join(st.student_domains)})
     now = utcnow()
     with s.db.session() as db:
         row = db.get(LoginCode, email)
@@ -209,10 +212,12 @@ def send_code(request: Request, email: str = Form(...)):
         db.commit()
     st = s.settings()
     sender = st.institution_name or st.app_title
+    _ = i18n.translator(st.default_language)
     s.mailer.send(
         email,
-        f"{code} is your {st.app_title} sign-in code",
-        f"Your sign-in code is {code}\n\nIt expires in 10 minutes. If you did not ask for it, ignore this email.\n\n{sender}",
+        _("{code} is your {app} sign-in code", code=code, app=st.app_title),
+        _("Your sign-in code is {code}", code=code) + "\n\n"
+        + _("It expires in 10 minutes. If you did not ask for it, ignore this email.") + f"\n\n{sender}",
         sender_name=sender,
         from_email=pending_teacher(request),
     )
@@ -271,7 +276,16 @@ def profile_save(request: Request, name: str = Form(...), next: str = Form("")):
     return RedirectResponse(safe_next(request, next), status_code=303)
 
 
+@router.get("/lang/{code}")
+def set_language(request: Request, code: str, next: str | None = None):
+    request.session["lang"] = i18n.normalize(code)
+    return RedirectResponse(safe_next(request, next), status_code=303)
+
+
 @router.get("/logout")
 def logout(request: Request):
+    lang = request.session.get("lang")
     request.session.clear()
+    if lang:
+        request.session["lang"] = lang
     return RedirectResponse(svc(request).url("/"), status_code=303)

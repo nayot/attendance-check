@@ -1,32 +1,32 @@
 {% extends "base.html" %}
-{% block title %}Sign in{% endblock %}
+{% block title %}{{ _("Sign in") }}{% endblock %}
 {% block main_class %}page narrow{% endblock %}
 {% block content %}
 <section class="card">
-  <h1>Sign in</h1>
-  {% if pending %}<p class="notice">Sign in to finish checking in. Your scan is saved for 3 minutes.</p>{% endif %}
-  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <h1>{{ _("Sign in") }}</h1>
+  {% if pending %}<p class="notice">{{ _("Sign in to finish checking in. Your scan is saved for 3 minutes.") }}</p>{% endif %}
+  {% if error %}<p class="error">{{ _(error, **(params or {})) }}</p>{% endif %}
   {% if st.student_domains %}
-  <p class="muted">Use your institution account ({% for d in st.student_domains %}{{ d }}{% if not loop.last %}, {% endif %}{% endfor %}).</p>
+  <p class="muted">{{ _("Use your institution account") }} ({{ st.student_domains | join(', ') }}).</p>
   {% endif %}
 
   {% for p in providers %}
-  <a class="button block provider" href="{{ url('/login/' ~ p.name) }}">Continue with {{ p.label }}</a>
+  <a class="button block provider" href="{{ url('/login/' ~ p.name) }}">{{ _("Continue with {provider}", provider=p.label) }}</a>
   {% endfor %}
 
   {% if otp_enabled %}
-  {% if providers %}<div class="divider"><span>or get a code by email</span></div>{% endif %}
+  {% if providers %}<div class="divider"><span>{{ _("or get a code by email") }}</span></div>{% endif %}
   <form method="post" action="{{ url('/login/code') }}" class="stack">
     <input type="hidden" name="csrf" value="{{ csrf }}">
-    <label>Email
+    <label>{{ _("Email") }}
       <input type="email" name="email" value="{{ email or '' }}" required autocomplete="email" inputmode="email">
     </label>
-    <button type="submit" class="{% if providers %}secondary{% endif %}">Email me a sign-in code</button>
+    <button type="submit" class="{% if providers %}secondary{% endif %}">{{ _("Email me a sign-in code") }}</button>
   </form>
   {% endif %}
 
   {% if not providers and not otp_enabled %}
-  <p class="error">No sign-in method is configured. Set OIDC_PROVIDERS or OTP_LOGIN in the environment.</p>
+  <p class="error">{{ _("No sign-in method is configured. Set OIDC_PROVIDERS or OTP_LOGIN in the environment.") }}</p>
   {% endif %}
 </section>
 {% endblock %}

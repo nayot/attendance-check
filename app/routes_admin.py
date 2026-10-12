@@ -8,6 +8,7 @@ from zoneinfo import available_timezones
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, RedirectResponse
 
+from . import i18n
 from . import settings as settings_mod
 from .web import check_csrf, render, require_admin, svc
 
@@ -41,6 +42,7 @@ def settings_save(
     accent_color: str = Form("#1f5fbf"),
     student_emails_default: bool = Form(False),
     report_email_default: bool = Form(False),
+    default_language: str = Form("en"),
 ):
     if timezone not in available_timezones():
         raise HTTPException(400, "Unknown time zone.")
@@ -55,6 +57,7 @@ def settings_save(
         "accent_color": accent_color if COLOR.match(accent_color) else "#1f5fbf",
         "student_emails_default": "1" if student_emails_default else "0",
         "report_email_default": "1" if report_email_default else "0",
+        "default_language": i18n.normalize(default_language),
     })
     return RedirectResponse(svc(request).url("/admin/settings?saved=1"), status_code=303)
 
@@ -64,7 +67,7 @@ async def logo_upload(request: Request, file: UploadFile, user: dict = Depends(r
     s = svc(request)
     st = s.settings()
     if len(st.logos) >= MAX_LOGOS:
-        raise HTTPException(400, f"At most {MAX_LOGOS} logos. Remove one first.")
+        raise HTTPException(400, "At most 4 logos. Remove one first.")
     ext = LOGO_TYPES.get(file.content_type or "")
     if ext is None:
         raise HTTPException(400, "Logos must be PNG, JPEG, GIF, WebP or SVG images.")

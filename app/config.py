@@ -39,6 +39,7 @@ SEED_VARS = {
     "teacher_domains": "TEACHER_DOMAINS",
     "teacher_emails": "TEACHER_EMAILS",
     "timezone": "TIMEZONE",
+    "default_language": "DEFAULT_LANGUAGE",
 }
 
 

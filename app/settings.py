@@ -4,6 +4,7 @@ import json
 from dataclasses import dataclass, field
 from zoneinfo import ZoneInfo, available_timezones
 
+from . import i18n
 from .db import Database, Setting
 
 DEFAULTS = {
@@ -18,6 +19,7 @@ DEFAULTS = {
     "student_emails_default": "1",
     "report_email_default": "1",
     "accent_color": "#1f5fbf",
+    "default_language": "en",
 }
 
 
@@ -50,6 +52,7 @@ class Settings:
     student_emails_default: bool = True
     report_email_default: bool = True
     accent_color: str = "#1f5fbf"
+    default_language: str = "en"
 
     @property
     def tz(self) -> ZoneInfo:
@@ -87,6 +90,7 @@ def load(db: Database) -> Settings:
         student_emails_default=raw["student_emails_default"] == "1",
         report_email_default=raw["report_email_default"] == "1",
         accent_color=raw["accent_color"] or "#1f5fbf",
+        default_language=i18n.normalize(raw["default_language"]),
     )
 
 

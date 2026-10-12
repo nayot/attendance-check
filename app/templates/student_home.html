@@ -2,9 +2,9 @@
 {% block main_class %}page narrow{% endblock %}
 {% block content %}
 <section class="card center">
-  <h1>You're signed in</h1>
-  <p>as <strong>{{ user.name }}</strong> &lt;{{ user.email }}&gt;</p>
-  <p>To check in, scan the QR code on the classroom screen with your phone's camera.</p>
-  <p class="muted"><a href="{{ url('/profile') }}">Change your name</a></p>
+  <h1>{{ _("You're signed in") }}</h1>
+  <p>{{ _("as") }} <strong>{{ user.name }}</strong> &lt;{{ user.email }}&gt;</p>
+  <p>{{ _("To check in, scan the QR code on the classroom screen with your phone's camera.") }}</p>
+  <p class="muted"><a href="{{ url('/profile') }}">{{ _("Change your name") }}</a></p>
 </section>
 {% endblock %}

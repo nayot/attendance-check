@@ -1,7 +1,7 @@
-Hello {{ name or 'there' }},
+{{ _("Hello {name},", name=name) if name else _("Hello,") }}
 
-Your {{ phase | lower }} for {{ title }} was recorded at {{ time }} ({{ timezone }}).
+{{ _("Your {phase} for {title} was recorded at {time} ({tz}).", phase=phase if lang == "th" else phase | lower, title=title, time=time, tz=timezone) }}
 
-If this wasn't you, tell your teacher.
+{{ _("If this wasn't you, tell your teacher.") }}
 
 {{ st.institution_name or st.app_title }}

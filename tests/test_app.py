@@ -1,4 +1,5 @@
 import base64
+import json
 import re
 import sqlite3
 import time
@@ -50,7 +51,7 @@ def login(app, c, email, name="Somchai Jaidee", outbox=None):
     code = re.search(r"\b(\d{6})\b", msg["Subject"]).group(1)
     token = re.search(r'name="csrf" value="([^"]+)"', r.text).group(1)
     r = c.post("/attendance/login/verify", data={"code": code, "csrf": token})
-    if "Your name" in r.text:
+    if 'name="name"' in r.text:
         nxt = re.search(r'name="next" value="([^"]+)"', r.text).group(1)
         token = re.search(r'name="csrf" value="([^"]+)"', r.text).group(1)
         r = c.post("/attendance/profile", data={"name": name, "next": nxt, "csrf": token})
@@ -204,7 +205,7 @@ def test_stale_pending_scan_is_ignored(app, monkeypatch):
         s.get(url)  # scan while signed out: remembered as pending
         monkeypatch.setattr("app.routes_auth.PENDING_TTL", -1)  # scan has expired
         r = login(app, s, STUDENT)
-        assert "You're signed in" in r.text
+        assert "signed in" in r.text and "Check-in recorded" not in r.text
 
 
 def test_mail_sent_from_teacher_gmail(tmp_path, monkeypatch):
@@ -259,3 +260,36 @@ def test_mail_sent_from_teacher_gmail(tmp_path, monkeypatch):
     assert TEACHER in msg["From"] and msg["To"] == STUDENT
     assert sends[1][2]["Authorization"] == "Bearer at"
     assert sum(1 for c in calls if "token" in c[0]) == 1  # access token cached
+
+
+def test_thai_language(app):
+    with client(app) as t:
+        login(app, t, TEACHER, "Dr Teacher")
+        r = t.get("/attendance/lang/th?next=/attendance/")
+        assert "เริ่มคาบเรียน" in r.text and 'lang="th"' in r.text
+        sid, _ = start_session(app, t)
+        r = t.get(f"/attendance/sessions/{sid}")
+        assert "สแกนด้วยกล้องโทรศัพท์" in r.text
+        i18n_json = re.search(r"window.I18N = (\{.*?\});", r.text, re.S).group(1)
+        assert json.loads(re.sub(r",\s*}", "}", i18n_json))["Pause"] == "หยุดชั่วคราว"
+        labels = [p["label"] for p in t.get(f"/attendance/sessions/{sid}/state").json()["phases"]]
+        assert labels == ["เช็คชื่อเข้าเรียน", "เช็คชื่อระหว่างคาบ 1", "เช็คชื่อออก"]
+        r = t.get(f"/attendance/sessions/{sid}/report")
+        assert "2569" in r.text  # Buddhist-era year
+        # Switching back works, and an unknown language falls back to English.
+        assert "Start a class session" in t.get("/attendance/lang/xx?next=/attendance/").text
+
+
+def test_emails_follow_default_language(app):
+    from app import settings as S
+    S.save(app.state.svc.db, {"default_language": "th"})
+    with client(app) as t:
+        login(app, t, TEACHER, "Dr Teacher")
+        _, state = start_session(app, t)
+        with client(app) as s:
+            s.get(qr_url(app, state["phases"][0]["id"]))
+            r = login(app, s, STUDENT)
+            assert "บันทึกเช็คชื่อเข้าเรียนแล้ว" in r.text  # new visitors see the default language
+    msg = [m for m in app.state.svc.mailer.sent if m["To"] == STUDENT][-1]
+    assert msg["Subject"].startswith("ยืนยันเช็คชื่อเข้าเรียน")
+    assert "เรียน Somchai Jaidee" in msg.get_body(("plain",)).get_content()

@@ -3,12 +3,12 @@
 <h2 style="margin:0 0 4px;">{{ title }}</h2>
 <p style="margin:0 0 16px;color:#666;">{{ date }}</p>
 <p>
-  {% for p in phases %}<strong>{{ p.checkins | length }}</strong> {{ p.label }} &nbsp;·&nbsp; {% endfor %}
-  <strong>{{ rows | length }}</strong> students in total
+  {% for p in phases %}<strong>{{ p.checkins | length }}</strong> {{ phase_label(p.label) }} &nbsp;·&nbsp; {% endfor %}
+  <strong>{{ rows | length }}</strong> {{ _("students in total") }}
 </p>
 <table cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:13px;">
   <tr style="background:#f4f5f7;text-align:left;">
-    <th>#</th><th>Name</th><th>Email</th>{% for p in phases %}<th>{{ p.label }}</th>{% endfor %}
+    <th>#</th><th>{{ _("Name") }}</th><th>{{ _("Email") }}</th>{% for p in phases %}<th>{{ phase_label(p.label) }}</th>{% endfor %}
   </tr>
   {% for r in rows %}
   <tr style="border-top:1px solid #e3e6eb;">
@@ -17,5 +17,5 @@
   </tr>
   {% endfor %}
 </table>
-<p style="margin-top:20px;">The full list is attached as a CSV file. <a href="{{ report_url }}">View it online</a>.</p>
+<p style="margin-top:20px;">{{ _("The full list is attached as a CSV file.") }} <a href="{{ report_url }}">{{ _("View it online") }}</a>.</p>
 {% endblock %}

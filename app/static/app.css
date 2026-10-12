@@ -145,3 +145,11 @@ body.display { background: #fff; }
   .list-panel { border-left: none; padding-left: 0; }
   #app { height: auto; }
 }
+
+.lang-switch { font-size: .85rem; color: var(--muted); white-space: nowrap; }
+.lang-switch strong { color: var(--text); }
+@media (max-width: 480px) {
+  .topbar { padding: .5rem .75rem; }
+  .topbar .who { display: none; }
+  .brand img { height: 32px; }
+}

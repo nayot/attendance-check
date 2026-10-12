@@ -8,14 +8,14 @@ from fastapi.responses import RedirectResponse
 from . import attendance as att
 from .db import Phase
 from .routes_auth import PENDING_TTL
-from .web import current_user, login_url, render, svc
+from .web import current_user, language, login_url, render, svc
 
 router = APIRouter()
 
 
 def _result(request: Request, r: att.CheckInResult, status_code: int = 200):
     return render(request, "checkin_result.html", status_code, r=r,
-                  title=att.session_title(r.session) if r.session else "")
+                  title=att.session_title(r.session, language(request)) if r.session else "")
 
 
 @router.get("/c/{phase_id}/{token}")
