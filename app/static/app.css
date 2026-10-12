@@ -140,6 +140,12 @@ body.display { background: #fff; }
 .conn.on { background: var(--ok); }
 .conn.off { background: var(--bad); }
 
+.lang-switch { white-space: nowrap; }
+.lang-switch strong { font-weight: 700; }
+@media (max-width: 520px) {
+  .topbar .who { display: none; }
+  .topbar { padding: .5rem .75rem; }
+}
 @media (max-width: 800px) {
   .stage { grid-template-columns: 1fr; }
   .list-panel { border-left: none; padding-left: 0; }

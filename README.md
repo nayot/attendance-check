@@ -13,6 +13,8 @@ A small self-hosted web app that lets teachers take class attendance with a rota
   CSV file attached. The list can also be downloaded or corrected by hand.
 - English and Thai interface. Everyone can switch language in the header, and the admin picks the default,
   which is also used for emails.
+- English and Thai user interface: everyone can switch language in the header, and an admin picks the default
+  language, which is also used for emails. Thai dates use Thai month names and Buddhist-era years.
 - Settings for the institution name, logos, accent colour, allowed student email domains, teacher allowlist,
   time zone and QR interval. Nothing is tied to one institution.
 
@@ -122,6 +124,7 @@ edited on the **Settings** page by an administrator:
 | Student email domains | e.g. `students.example.edu, *.example.edu`. Empty allows any verified email |
 | Teacher domains / emails | Who may start sessions. Admins always can |
 | Default language | English or Thai, for new visitors and for emails. Thai dates use Buddhist-era years |
+| Default language | English or Thai, for new visitors and for all emails |
 | Time zone | Used for every time shown, emailed or exported |
 | QR interval | Seconds between code changes (5–120). A scanned code is accepted for up to two intervals |
 | Email defaults | Whether new sessions email students and the teacher |
@@ -163,6 +166,12 @@ log instead.
 
 The app runs as **one process**: live updates and the mail queue are kept in memory. One instance easily
 handles a whole faculty. Don't start it with several workers.
+
+## Adding a language
+
+UI strings are written in English and translated in [`app/i18n.py`](app/i18n.py). Copy the `TH` catalog, translate
+it, and register it in `CATALOGS` and `LANGUAGES`. `tests/test_i18n.py` fails if a string the UI shows has no
+Thai translation, so run it after adding text.
 
 ## License
 
