@@ -66,6 +66,7 @@ class Config:
     smtp_starttls: bool
     smtp_ssl: bool
     otp_enabled: bool
+    gmail_send: bool
     providers: list[OIDCProvider] = field(default_factory=list)
     cookie_secure: bool = True
     # Initial values for admin settings, applied only while a setting is unset.
@@ -82,6 +83,10 @@ class Config:
     @property
     def smtp_configured(self) -> bool:
         return bool(self.smtp_host)
+
+    @property
+    def google(self) -> "OIDCProvider | None":
+        return next((p for p in self.providers if p.name == "google"), None)
 
 
 def _providers(env) -> list[OIDCProvider]:
@@ -131,6 +136,7 @@ def load(env=None) -> Config:
         smtp_starttls=_bool(env.get("SMTP_STARTTLS", ""), True),
         smtp_ssl=_bool(env.get("SMTP_SSL", ""), False),
         otp_enabled=_bool(env.get("OTP_LOGIN", ""), True),
+        gmail_send=_bool(env.get("GMAIL_SEND", ""), False),
         providers=_providers(env),
         cookie_secure=public_url.startswith("https://"),
         seed_settings={

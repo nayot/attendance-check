@@ -252,19 +252,30 @@ def _logo(svc: Services, st: Settings) -> tuple[str, bytes] | None:
     return None
 
 
-def _email(svc: Services, st: Settings, to: str, subject: str, template: str, attachments=(), **ctx) -> None:
+def _email(svc: Services, st: Settings, to: str, subject: str, template: str, attachments=(),
+           teacher: str | None = None, **ctx) -> None:
     logo = _logo(svc, st)
     ctx.update(st=st, has_logo=logo is not None, app_url=svc.absolute("/"))
     html = EMAILS.get_template(f"emails/{template}.html").render(**ctx)
     text = EMAILS.get_template(f"emails/{template}.txt").render(**ctx)
-    svc.mailer.send(to, subject, text, html, sender_name=st.institution_name or st.app_title,
-                    attachments=attachments, inline_logo=logo)
+    sender_name = st.institution_name or st.app_title
+    if teacher and svc.mailer.gmail and svc.mailer.gmail.connected(teacher):
+        sender_name = teacher_name(svc, teacher) or sender_name
+    svc.mailer.send(to, subject, text, html, sender_name=sender_name, attachments=attachments,
+                    inline_logo=logo, from_email=teacher)
+
+
+def teacher_name(svc: Services, email: str) -> str:
+    with svc.db.session() as db:
+        user = db.get(User, email)
+        return user.name if user else ""
 
 
 def send_student_email(svc: Services, st: Settings, r: CheckInResult) -> None:
     title = session_title(r.session)
     _email(
         svc, st, r.checkin.email, f"{r.phase.label} confirmed: {title}", "student",
+        teacher=r.session.teacher_email,
         name=r.checkin.name, title=title, phase=r.phase.label,
         time=format_local(r.checkin.created_at, st, "%d %b %Y, %H:%M:%S"),
         timezone=st.timezone,
@@ -279,6 +290,7 @@ def send_report_email(svc: Services, session_id: int, to: str) -> None:
     _email(
         svc, st, to, f"Attendance report: {title} ({format_local(sess.created_at, st, '%d %b %Y')})", "report",
         attachments=[(report_filename(sess, st), "text/csv", report_csv(sess, st).encode("utf-8"))],
+        teacher=sess.teacher_email,
         title=title, sess=sess, phases=phases, rows=rows,
         date=format_local(sess.created_at, st, "%d %b %Y, %H:%M"),
         local=lambda dt: format_local(dt, st, "%H:%M:%S"),

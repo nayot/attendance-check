@@ -15,6 +15,7 @@ from . import config as config_mod
 from . import settings as settings_mod
 from .db import Database, Setting
 from .events import Broker
+from .gmail import GmailSender
 from .mailer import Mailer
 from .routes_admin import router as admin_router
 from .routes_auth import build_oauth
@@ -38,7 +39,12 @@ def create_app(config: config_mod.Config | None = None) -> FastAPI:
     config = config or config_mod.load()
     db = Database(config.db_path)
     seed_settings(db, config.seed_settings)
-    services = Services(config=config, db=db, mailer=Mailer(config), broker=Broker(),
+    gmail = None
+    if config.gmail_send:
+        if config.google is None:
+            raise RuntimeError("GMAIL_SEND needs the google OIDC provider (OIDC_PROVIDERS=google)")
+        gmail = GmailSender(db, config.secret_key, config.google.client_id, config.google.client_secret)
+    services = Services(config=config, db=db, mailer=Mailer(config, gmail), broker=Broker(),
                         signer=TokenSigner(config.secret_key))
 
     @asynccontextmanager

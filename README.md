@@ -8,7 +8,8 @@ A small self-hosted web app that lets teachers take class attendance with a rota
 - The QR code changes every few seconds, so a photo sent to a friend outside the room soon stops working.
 - **Pause** stops check-in instantly. The QR code is hidden, and codes already scanned are rejected.
 - Add **mid-class checks** and a **check-out** when you set up the session or while class is running.
-- Each student gets a confirmation email. When the session closes, the teacher gets the list by email with a
+- Each student gets a confirmation email, sent from the teacher's own Gmail / Google Workspace address
+  (or from a shared SMTP account). When the session closes, the teacher gets the list by email with a
   CSV file attached. The list can also be downloaded or corrected by hand.
 - Settings for the institution name, logos, accent colour, allowed student email domains, teacher allowlist,
   time zone and QR interval. Nothing is tied to one institution.
@@ -94,6 +95,18 @@ OIDC_MICROSOFT_TENANT=<your tenant id>
 to its `.well-known/openid-configuration` URL. See `.env.example`.
 
 Several providers can be enabled at once (`OIDC_PROVIDERS=google,microsoft`).
+
+### Sending email from the teacher's Google account
+
+Set `GMAIL_SEND=true` (requires the `google` provider). In the same Google Cloud project, enable the
+**Gmail API** and add the `https://www.googleapis.com/auth/gmail.send` scope to the consent screen. Each teacher
+then clicks **Connect Gmail** on their dashboard once. Student confirmations, sign-in codes for that class and
+attendance reports are sent from the teacher's own address. The refresh token is stored encrypted with a key
+derived from `SECRET_KEY`. Changing `SECRET_KEY` means teachers have to reconnect.
+
+`gmail.send` is a restricted scope. With an **Internal** consent screen (Google Workspace) no review is needed.
+An **External** app works without review for sign-in scopes, but teachers see an "unverified app" notice when
+connecting Gmail until Google verifies the app.
 
 ## Configuration
 

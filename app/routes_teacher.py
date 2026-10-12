@@ -45,7 +45,9 @@ def home(request: Request):
         for sess in sessions:
             sess.counts = [len(p.checkins) for p in sess.phases]
     names = sorted({x.class_name for x in sessions if x.class_name})
-    return render(request, "dashboard.html", sessions=sessions, class_names=names)
+    gmail = s.mailer.gmail
+    return render(request, "dashboard.html", sessions=sessions, class_names=names,
+                  gmail_enabled=gmail is not None, smtp_configured=s.config.smtp_configured, gmail_connected=bool(gmail and gmail.connected(user["email"])))
 
 
 @router.post("/sessions", dependencies=[Depends(check_csrf)])

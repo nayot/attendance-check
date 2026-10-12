@@ -63,6 +63,9 @@ button:disabled { opacity: .45; cursor: default; }
 .divider::before, .divider::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
 .notice { background: #eef4ff; border: 1px solid #c9dafc; padding: .6rem .8rem; border-radius: 8px; }
 .error { background: #fef3f2; border: 1px solid #fecdca; color: var(--bad); padding: .6rem .8rem; border-radius: 8px; }
+.gmail-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.5rem; }
+.gmail-card p { margin: 0; flex: 1; min-width: 240px; }
+.gmail-card form { margin: 0; }
 .inline-form { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; }
 
 /* Lists and tables */

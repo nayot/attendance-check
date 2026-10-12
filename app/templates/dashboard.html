@@ -1,6 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+{% if gmail_enabled %}
+<section class="card gmail-card">
+  {% if gmail_connected %}
+  <p>✓ Emails to your students and your attendance reports are sent from <strong>{{ user.email }}</strong>.</p>
+  <form method="post" action="{{ url('/gmail/disconnect') }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button type="submit" class="secondary small">Disconnect Gmail</button>
+  </form>
+  {% else %}
+  <p><strong>Connect your Gmail</strong> so check-in confirmations and attendance reports are sent from your own address.
+    Until then, {{ 'they are sent from the app\'s address' if smtp_configured else 'no emails are sent' }}.</p>
+  <a class="button" href="{{ url('/gmail/connect') }}">Connect Gmail</a>
+  {% endif %}
+</section>
+{% endif %}
 <div class="grid-2">
   <section class="card">
     <h1>Start a class session</h1>

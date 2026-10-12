@@ -13,8 +13,9 @@ from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
 
-from .db import LoginCode, User, utcnow
-from .web import check_csrf, current_user, render, safe_next, svc
+from .db import LoginCode, Phase, User, utcnow
+from .gmail import SCOPE as GMAIL_SCOPE
+from .web import check_csrf, current_user, render, require_teacher, safe_next, svc
 
 log = logging.getLogger("attendance.auth")
 router = APIRouter()
@@ -38,6 +39,19 @@ def build_oauth(config) -> OAuth:
             client_kwargs={"scope": "openid email profile"},
         )
     return oauth
+
+
+def pending_teacher(request: Request) -> str | None:
+    """Teacher of the class a signed-out student just scanned, if any.
+
+    Their connected Gmail can then send the student's sign-in code.
+    """
+    pending = request.session.get("pending")
+    if not pending:
+        return None
+    with svc(request).db.session() as db:
+        phase = db.get(Phase, pending.get("phase"))
+        return phase.session.teacher_email if phase else None
 
 
 def may_sign_in(request: Request, email: str) -> bool:
@@ -103,6 +117,7 @@ async def auth_callback(request: Request, provider: str):
     client = request.app.state.oauth.create_client(provider)
     if client is None:
         return render(request, "message.html", 404, title="Unknown sign-in method")
+    connecting = request.session.pop("gmail_connect", False)
     try:
         token = await client.authorize_access_token(request)
     except OAuthError as exc:
@@ -110,6 +125,8 @@ async def auth_callback(request: Request, provider: str):
         return render(request, "message.html", 400, title="Sign-in failed", text=str(exc.description or exc.error))
     info = token.get("userinfo") or {}
     email = (info.get("email") or info.get("preferred_username") or "").lower()
+    if connecting:
+        return finish_gmail_connect(request, email, token)
     if not EMAIL_RE.match(email) or info.get("email_verified") is False:
         return render(request, "message.html", 400, title="Sign-in failed",
                       text="Your account did not provide a verified email address.")
@@ -117,6 +134,43 @@ async def auth_callback(request: Request, provider: str):
         return render(request, "message.html", 403, title="Account not allowed",
                       text=f"{email} is not in an allowed email domain. Sign in with your institution account.")
     return finish_login(request, email, info.get("name") or "")
+
+
+@router.get("/gmail/connect")
+async def gmail_connect(request: Request, user: dict = Depends(require_teacher)):
+    """Ask the teacher's Google account for permission to send mail as them."""
+    s = svc(request)
+    if s.mailer.gmail is None:
+        return render(request, "message.html", 404, title="Gmail sending is not enabled")
+    request.session["gmail_connect"] = True
+    client = request.app.state.oauth.create_client("google")
+    return await client.authorize_redirect(
+        request, s.absolute("/auth/google"),
+        scope="openid email " + GMAIL_SCOPE,
+        access_type="offline", prompt="consent", include_granted_scopes="true",
+        login_hint=user["email"],
+    )
+
+
+def finish_gmail_connect(request: Request, email: str, token: dict):
+    s = svc(request)
+    user = current_user(request)
+    if not user or email != user["email"]:
+        return render(request, "message.html", 400, title="Wrong Google account",
+                      text=f"Choose {user['email'] if user else 'your own account'} when Google asks.")
+    if GMAIL_SCOPE not in token.get("scope", "").split() or not token.get("refresh_token"):
+        return render(request, "message.html", 400, title="Gmail not connected",
+                      text="Google did not grant permission to send email. Try again and tick the Gmail box.")
+    s.mailer.gmail.save(email, token["refresh_token"])
+    return RedirectResponse(s.url("/?gmail=connected"), status_code=303)
+
+
+@router.post("/gmail/disconnect", dependencies=[Depends(check_csrf)])
+def gmail_disconnect(request: Request, user: dict = Depends(require_teacher)):
+    s = svc(request)
+    if s.mailer.gmail is not None:
+        s.mailer.gmail.forget(user["email"])
+    return RedirectResponse(s.url("/"), status_code=303)
 
 
 def _hash_code(request: Request, email: str, code: str) -> str:
@@ -160,6 +214,7 @@ def send_code(request: Request, email: str = Form(...)):
         f"{code} is your {st.app_title} sign-in code",
         f"Your sign-in code is {code}\n\nIt expires in 10 minutes. If you did not ask for it, ignore this email.\n\n{sender}",
         sender_name=sender,
+        from_email=pending_teacher(request),
     )
     request.session["otp_email"] = email
     return render(request, "code.html", email=email)

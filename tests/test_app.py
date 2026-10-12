@@ -1,5 +1,8 @@
+import base64
 import re
+import sqlite3
 import time
+from email import message_from_bytes
 
 import pytest
 from fastapi.testclient import TestClient
@@ -34,12 +37,16 @@ def csrf(c, path="/attendance/login"):
     return re.search(r'name="csrf" value="([^"]+)"', html).group(1)
 
 
-def login(app, c, email, name="Somchai Jaidee"):
+def login(app, c, email, name="Somchai Jaidee", outbox=None):
     mailer = app.state.svc.mailer
-    before = len(mailer.sent)
+    outbox = mailer.sent if outbox is None else outbox
+    before = len(outbox)
     r = c.post("/attendance/login/code", data={"email": email, "csrf": csrf(c)})
     assert r.status_code == 200, r.text
-    msg = mailer.sent[before]
+    deadline = time.time() + 5
+    while len(outbox) <= before and time.time() < deadline:
+        time.sleep(0.05)
+    msg = outbox[before]
     code = re.search(r"\b(\d{6})\b", msg["Subject"]).group(1)
     token = re.search(r'name="csrf" value="([^"]+)"', r.text).group(1)
     r = c.post("/attendance/login/verify", data={"code": code, "csrf": token})
@@ -198,3 +205,57 @@ def test_stale_pending_scan_is_ignored(app, monkeypatch):
         monkeypatch.setattr("app.routes_auth.PENDING_TTL", -1)  # scan has expired
         r = login(app, s, STUDENT)
         assert "You're signed in" in r.text
+
+
+def test_mail_sent_from_teacher_gmail(tmp_path, monkeypatch):
+    cfg = config_mod.load({
+        "PUBLIC_URL": "http://testserver/attendance", "SECRET_KEY": "y" * 40, "DATA_DIR": str(tmp_path),
+        "ADMIN_EMAILS": TEACHER, "STUDENT_DOMAINS": "students.uni.example",
+        "OIDC_PROVIDERS": "google", "OIDC_GOOGLE_CLIENT_ID": "cid", "OIDC_GOOGLE_CLIENT_SECRET": "cs",
+        "GMAIL_SEND": "true",
+    })
+    app = create_app(cfg)
+    calls = []
+    gmail_out = []
+
+    class Resp:
+        def __init__(self, data, code=200):
+            self.status_code, self._data = code, data
+
+        def json(self):
+            return self._data
+
+        def raise_for_status(self):
+            pass
+
+    def fake_post(url, data=None, json=None, headers=None, timeout=None):
+        calls.append((url, data or json, headers))
+        if "messages/send" in url:
+            gmail_out.append(message_from_bytes(base64.urlsafe_b64decode(json["raw"])))
+        if "token" in url:
+            return Resp({"access_token": "at", "expires_in": 3600})
+        return Resp({"id": "m1"})
+
+    monkeypatch.setattr("app.gmail.httpx.post", fake_post)
+    gmail = app.state.svc.mailer.gmail
+    gmail.save(TEACHER, "refresh-1")
+    # Stored encrypted, not in clear text.
+    raw = sqlite3.connect(tmp_path / "attendance.db").execute("select refresh_token from gmail_tokens").fetchone()[0]
+    assert "refresh-1" not in raw
+
+    with client(app) as t:
+        login(app, t, TEACHER, "Dr Teacher")  # OTP via log: teacher has no pending scan
+        _, state = start_session(app, t)
+        url = qr_url(app, state["phases"][0]["id"])
+        with client(app) as s:
+            s.get(url)
+            login(app, s, STUDENT, outbox=gmail_out)  # sign-in code goes out via the teacher's Gmail
+        deadline = time.time() + 5
+        while len([c for c in calls if "messages/send" in c[0]]) < 2 and time.time() < deadline:
+            time.sleep(0.05)
+    sends = [c for c in calls if "messages/send" in c[0]]
+    assert len(sends) == 2  # sign-in code + confirmation
+    msg = gmail_out[1]
+    assert TEACHER in msg["From"] and msg["To"] == STUDENT
+    assert sends[1][2]["Authorization"] == "Bearer at"
+    assert sum(1 for c in calls if "token" in c[0]) == 1  # access token cached
