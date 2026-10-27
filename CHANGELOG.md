@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3 — 2026-10-27
+
+- **Fix: students could become teachers.** When a teacher domain was also a student domain (staff and students
+  sharing one domain), every student counted as a teacher, saw the dashboard instead of the student page, and
+  could start their own session and check in there. Those check-ins never reached the class's report. A teacher
+  domain now makes nobody a teacher if the address is also in a student domain; list such teachers individually.
+- Settings shows a warning when a teacher domain is also a student domain.
+
 ## 0.1.2 — 2026-10-12
 
 - Attendance tables (report email, report page and CSV) have one column per check held (check-in, each

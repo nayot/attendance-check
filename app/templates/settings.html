@@ -31,8 +31,11 @@
       </label>
       <label>{{ _("Teacher email domains") }}
         <textarea name="teacher_domains" rows="2" placeholder="example.edu">{{ st.teacher_domains | join(', ') }}</textarea>
-        <span class="muted small">{{ _("Everyone in these domains can create sessions.") }}</span>
+        <span class="muted small">{{ _("Everyone in these domains can create sessions, except addresses that are also in a student domain: add those teachers individually below.") }}</span>
       </label>
+      {% if st.overlapping_domains %}
+      <p class="error">{{ _("{domains} is also a student domain, so it makes nobody a teacher. Add each teacher's address below.", domains=st.overlapping_domains | join(', ')) }}</p>
+      {% endif %}
       <label>{{ _("Individual teacher emails") }}
         <textarea name="teacher_emails" rows="3" placeholder="teacher@example.edu">{{ st.teacher_emails | join(', ') }}</textarea>
       </label>

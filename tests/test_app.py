@@ -9,6 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import config as config_mod
+from app import settings as settings_mod
 from app.main import create_app
 
 TEACHER = "teacher@uni.example"
@@ -172,6 +173,25 @@ def test_student_cannot_open_teacher_pages(app):
         assert s.get("/attendance/admin/settings").status_code == 403
         r = s.post("/attendance/sessions", data={"csrf": csrf(s, "/attendance/profile")})
         assert r.status_code == 403
+
+
+def test_shared_teacher_and_student_domain(app):
+    # Staff and students share a domain: the domain alone must not make students teachers.
+    svc = app.state.svc
+    settings_mod.save(svc.db, {"teacher_domains": "students.uni.example, staff.uni.example",
+                               "teacher_emails": "lecturer@students.uni.example"})
+    st = svc.settings()
+    assert not svc.is_teacher(STUDENT, st)
+    assert svc.is_teacher("lecturer@students.uni.example", st)
+    assert svc.is_teacher("someone@staff.uni.example", st)
+    assert st.overlapping_domains == ["students.uni.example"]
+    with client(app) as s:
+        assert "Start a class session" not in login(app, s, STUDENT).text
+        r = s.post("/attendance/sessions", data={"csrf": csrf(s, "/attendance/profile")})
+        assert r.status_code == 403
+    with client(app) as t:
+        login(app, t, TEACHER)
+        assert "students.uni.example is also a student domain" in t.get("/attendance/admin/settings").text
 
 
 def test_settings_and_logo(app):

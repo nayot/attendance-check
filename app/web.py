@@ -49,7 +49,7 @@ class Services:
         if self.is_admin(email):
             return True
         st = st or self.settings()
-        return email in st.teacher_emails or settings_mod.domain_allowed(email, st.teacher_domains)
+        return st.teacher_allowed(email)
 
 
 class Redirect(Exception):

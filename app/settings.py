@@ -65,6 +65,24 @@ class Settings:
         # No domains configured means any verified email may check in.
         return not self.student_domains or domain_allowed(email, self.student_domains)
 
+    def teacher_allowed(self, email: str) -> bool:
+        """Listed teachers, or anyone in a teacher domain who is not in a student domain.
+
+        Staff and students often share one domain. A teacher domain alone must not make
+        students teachers, so teachers in a student domain go in the individual list.
+        """
+        email = email.lower()
+        if email in self.teacher_emails:
+            return True
+        if self.student_domains and domain_allowed(email, self.student_domains):
+            return False
+        return domain_allowed(email, self.teacher_domains)
+
+    @property
+    def overlapping_domains(self) -> list[str]:
+        """Teacher domains that are also student domains, so they make nobody a teacher."""
+        return [d for d in self.teacher_domains if domain_allowed("x@" + d.removeprefix("*."), self.student_domains)]
+
 
 def load(db: Database) -> Settings:
     with db.session() as s:

@@ -166,7 +166,10 @@ TH = {
     "Only these domains can check in. *.example.edu matches any subdomain. Leave empty to allow any verified email.":
         "เฉพาะโดเมนเหล่านี้ที่เช็คชื่อได้ *.example.edu หมายถึงทุกโดเมนย่อย เว้นว่างไว้เพื่ออนุญาตอีเมลที่ยืนยันแล้วทุกโดเมน",
     "Teacher email domains": "โดเมนอีเมลอาจารย์",
-    "Everyone in these domains can create sessions.": "ทุกคนในโดเมนเหล่านี้สร้างคาบเรียนได้",
+    "Everyone in these domains can create sessions, except addresses that are also in a student domain: add those teachers individually below.":
+        "ทุกคนในโดเมนเหล่านี้สร้างคาบเรียนได้ ยกเว้นอีเมลที่อยู่ในโดเมนนักศึกษาด้วย ให้เพิ่มอาจารย์กลุ่มนี้เป็นรายบุคคลด้านล่าง",
+    "{domains} is also a student domain, so it makes nobody a teacher. Add each teacher's address below.":
+        "{domains} เป็นโดเมนนักศึกษาด้วย จึงไม่ทำให้ใครเป็นอาจารย์ ให้เพิ่มอีเมลอาจารย์แต่ละคนด้านล่าง",
     "Individual teacher emails": "อีเมลอาจารย์รายบุคคล",
     "Administrators (from ADMIN_EMAILS):": "ผู้ดูแลระบบ (จาก ADMIN_EMAILS):",
     "They are always teachers too.": "ผู้ดูแลระบบเป็นอาจารย์ด้วยเสมอ",
