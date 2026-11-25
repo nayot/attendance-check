@@ -60,8 +60,8 @@
     <button id="btn-mid" class="secondary">{{ _("+ Mid-class check") }}</button>
     <button id="btn-checkout" class="secondary">{{ _("+ Check-out") }}</button>
     </span>
-    <button id="btn-live" class="ask">✦ {{ _("Ask the class") }}</button>
     <span class="live-controls" id="live-controls" hidden>
+      <button type="button" id="btn-live" class="ask">✦ {{ _("New question") }}</button>
       <span class="seg" id="chart-toggle" role="group" aria-label="{{ _('Chart') }}">
         <button type="button" id="btn-bar" class="secondary">{{ _("Bar") }}</button><button type="button" id="btn-pie" class="secondary">{{ _("Pie") }}</button>
       </span>
@@ -72,51 +72,13 @@
     <span class="spacer"></span>
     {% include "lang_switch.html" %}
     <span class="conn" id="conn" title="{{ _('Live connection') }}"></span>
-    <a class="button secondary" href="{{ url('/sessions/' ~ sess.id ~ '/report') }}" target="_blank">{{ _("List") }}</a>
+    <a class="button secondary" href="{{ url('/sessions/' ~ sess.id ~ '/report') }}">{{ _("List") }}</a>
     <form method="post" action="{{ url('/sessions/' ~ sess.id ~ '/close') }}" id="close-form">
       <input type="hidden" name="csrf" value="{{ csrf }}">
       <button type="submit" class="danger">{{ _("Close session") }}</button>
     </form>
   </footer>
-
-  <dialog class="composer" id="composer">
-    <form id="composer-form" method="dialog">
-      <h2>✦ {{ _("Ask the class") }}</h2>
-      <div class="seg kind-seg" role="radiogroup">
-        <label><input type="radio" name="kind" value="vote" checked><span>📊 {{ _("Vote") }}</span></label>
-        <label><input type="radio" name="kind" value="text"><span>💬 {{ _("Short answer") }}</span></label>
-      </div>
-      <label>{{ _("Question") }}
-        <textarea name="question" id="c-question" rows="2" maxlength="200" required
-                  placeholder="{{ _('e.g. Which law relates voltage, current and resistance?') }}"></textarea>
-      </label>
-      <div id="c-vote">
-        <div class="c-head">
-          <span>{{ _("Choices") }}</span>
-          <span class="chips">
-            <button type="button" class="chip" data-fill="yesno">{{ _("Yes / No") }}</button>
-            <button type="button" class="chip" data-fill="tf">{{ _("True / False") }}</button>
-            <button type="button" class="chip" data-fill="abcd">A B C D</button>
-            <button type="button" class="chip" data-fill="scale">1–5</button>
-          </span>
-        </div>
-        <ol class="c-options" id="c-options"></ol>
-        <button type="button" class="link" id="c-add">+ {{ _("Add a choice") }}</button>
-        <div class="c-head"><span>{{ _("Show results as") }}</span></div>
-        <div class="seg chart-seg" role="radiogroup">
-          <label><input type="radio" name="chart" value="bar" checked><span><svg class="shape" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="2" y="4" width="14" height="4" rx="1"/><rect x="2" y="10" width="20" height="4" rx="1"/><rect x="2" y="16" width="9" height="4" rx="1"/></svg> {{ _("Bar chart") }}</span></label>
-          <label><input type="radio" name="chart" value="pie"><span><svg class="shape" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10H12Z" opacity=".55"/><path d="M14 0v10h10A10 10 0 0 0 14 0Z"/></svg> {{ _("Pie chart") }}</span></label>
-        </div>
-      </div>
-      <p class="muted small" id="c-text-note" hidden>{{ _("Each student can send up to 3 short answers. Similar answers are grouped, and the more often an answer is given, the bigger it shows.") }}</p>
-      <p class="muted small">{{ _("Answers are shown without names and are not saved.") }}</p>
-      <p class="error" id="c-error" hidden></p>
-      <div class="c-actions">
-        <button type="button" class="secondary" id="c-cancel">{{ _("Cancel") }}</button>
-        <button type="submit" class="large">▶ {{ _("Start") }}</button>
-      </div>
-    </form>
-  </dialog>
+  {% include "live_composer.html" %}
 </div>
 {% endblock %}
 {% block scripts %}
@@ -130,5 +92,6 @@
 </script>
 <script src="{{ url('/static/live-common.js') }}"></script>
 <script src="{{ url('/static/display.js') }}"></script>
+<script src="{{ url('/static/live-composer.js') }}"></script>
 <script src="{{ url('/static/display-live.js') }}"></script>
 {% endblock %}

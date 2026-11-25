@@ -82,7 +82,6 @@ TH = {
     "Email me the attendance list when I close the session": "ส่งรายชื่อผู้เข้าเรียนให้ฉันทางอีเมลเมื่อปิดคาบ",
     "You can add mid-class checks and a check-out while the class is running.":
         "เพิ่มการเช็คชื่อระหว่างคาบและเช็คชื่อออกได้ระหว่างที่สอน",
-    "Start and show QR code": "เริ่มและแสดง QR code",
     "Your sessions": "คาบเรียนของคุณ",
     "No sessions yet.": "ยังไม่มีคาบเรียน",
     "closed": "ปิดแล้ว",
@@ -136,7 +135,6 @@ TH = {
 
     # Report
     "Attendance": "การเข้าเรียน",
-    "Back to QR display": "กลับไปหน้าแสดง QR",
     "Download CSV": "ดาวน์โหลด CSV",
     "Email me this list": "ส่งรายชื่อนี้ทางอีเมล",
     "The attendance list is on its way to {email}.": "กำลังส่งรายชื่อผู้เข้าเรียนไปที่ {email}",
@@ -304,7 +302,6 @@ TH = {
     "Sent! Add another if you like.": "ส่งแล้ว! เพิ่มคำตอบได้อีก",
     "No connection. Try again.": "ไม่มีการเชื่อมต่อ ลองอีกครั้ง",
     "Unknown activity type.": "ไม่รู้จักประเภทกิจกรรมนี้",
-    "Type a question first.": "กรุณาพิมพ์คำถามก่อน",
     "A vote needs at least two choices.": "การโหวตต้องมีอย่างน้อยสองตัวเลือก",
     "Unknown choice.": "ไม่มีตัวเลือกนี้",
     "Type an answer first.": "กรุณาพิมพ์คำตอบก่อน",
@@ -312,6 +309,10 @@ TH = {
     "This question has ended.": "คำถามนี้จบแล้ว",
     "This link is not valid.": "ลิงก์นี้ใช้ไม่ได้",
     "Please sign in again.": "กรุณาเข้าสู่ระบบอีกครั้ง",
+    "Show check-in QR code": "แสดง QR code เช็คชื่อ",
+    "Show the question": "แสดงคำถาม",
+    "Start session": "เริ่มคาบเรียน",
+    "Answer the question your teacher asks.": "ตอบคำถามที่อาจารย์ถาม",
 }
 
 CATALOGS = {"th": TH}
@@ -373,5 +374,5 @@ DISPLAY_STRINGS = [
 LIVE_STRINGS = [
     "Vote", "Short answer", "Voting is closed.", "Vote sent. You can change it until voting closes.",
     "Tap your answer", "You can send {n} more", "Answers are closed.", "Thanks! All your answers are in.",
-    "Sent! Add another if you like.", "No connection. Try again.",
+    "Sent! Add another if you like.", "No connection. Try again.", "Answer the question your teacher asks.",
 ]

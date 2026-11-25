@@ -1,0 +1,38 @@
+<dialog class="composer" id="composer" data-base="{{ url('') }}" data-session="{{ sess.id }}" data-csrf="{{ csrf }}">
+  <form id="composer-form" method="dialog">
+    <h2>✦ {{ _("Ask the class") }}</h2>
+    <div class="seg kind-seg" role="radiogroup">
+      <label><input type="radio" name="kind" value="vote" checked><span>📊 {{ _("Vote") }}</span></label>
+      <label><input type="radio" name="kind" value="text"><span>💬 {{ _("Short answer") }}</span></label>
+    </div>
+    <label><span>{{ _("Question") }} <span class="muted">{{ _("(optional)") }}</span></span>
+      <textarea name="question" id="c-question" rows="2" maxlength="200"
+                placeholder="{{ _('e.g. Which law relates voltage, current and resistance?') }}"></textarea>
+    </label>
+    <div id="c-vote">
+      <div class="c-head">
+        <span>{{ _("Choices") }}</span>
+        <span class="chips">
+          <button type="button" class="chip" data-fill="yesno">{{ _("Yes / No") }}</button>
+          <button type="button" class="chip" data-fill="tf">{{ _("True / False") }}</button>
+          <button type="button" class="chip" data-fill="abcd">A B C D</button>
+          <button type="button" class="chip" data-fill="scale">1–5</button>
+        </span>
+      </div>
+      <ol class="c-options" id="c-options"></ol>
+      <button type="button" class="link" id="c-add">+ {{ _("Add a choice") }}</button>
+      <div class="c-head"><span>{{ _("Show results as") }}</span></div>
+      <div class="seg chart-seg" role="radiogroup">
+        <label><input type="radio" name="chart" value="bar" checked><span><svg class="shape" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="2" y="4" width="14" height="4" rx="1"/><rect x="2" y="10" width="20" height="4" rx="1"/><rect x="2" y="16" width="9" height="4" rx="1"/></svg> {{ _("Bar chart") }}</span></label>
+        <label><input type="radio" name="chart" value="pie"><span><svg class="shape" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 10 10H12Z" opacity=".55"/><path d="M14 0v10h10A10 10 0 0 0 14 0Z"/></svg> {{ _("Pie chart") }}</span></label>
+      </div>
+    </div>
+    <p class="muted small" id="c-text-note" hidden>{{ _("Each student can send up to 3 short answers. Similar answers are grouped, and the more often an answer is given, the bigger it shows.") }}</p>
+    <p class="muted small">{{ _("Answers are shown without names and are not saved.") }}</p>
+    <p class="error" id="c-error" hidden></p>
+    <div class="c-actions">
+      <button type="button" class="secondary" id="c-cancel">{{ _("Cancel") }}</button>
+      <button type="submit" class="large">▶ {{ _("Start") }}</button>
+    </div>
+  </form>
+</dialog>

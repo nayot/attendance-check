@@ -79,7 +79,8 @@ def new_session(
     sid = att.create_session(
         s, user["email"], class_name, max(0, min(5, mid_checks)), checkout, email_report, email_students
     )
-    return RedirectResponse(s.url(f"/sessions/{sid}"), status_code=303)
+    # Start on the attendance list, so the QR code is only shown when the teacher chooses.
+    return RedirectResponse(s.url(f"/sessions/{sid}/report"), status_code=303)
 
 
 @router.get("/sessions/{session_id}")
@@ -205,7 +206,8 @@ def report(request: Request, session_id: int, user: dict = Depends(require_teach
     sess = own_session(request, session_id, user)
     phases, rows = att.roster(sess)
     return render(request, "report.html", sess=sess, title=att.session_title(sess, language(request)), phases=phases,
-                  rows=rows, all_phases=sess.phases)
+                  rows=rows, all_phases=sess.phases, display_strings=i18n.DISPLAY_STRINGS,
+                  live_running=svc(request).live.results(session_id) is not None)
 
 
 @router.get("/sessions/{session_id}/report.csv")

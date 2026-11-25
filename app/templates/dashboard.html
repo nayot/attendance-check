@@ -36,7 +36,7 @@
       <label class="check"><input type="checkbox" name="email_report" value="true" {% if st.report_email_default %}checked{% endif %}>
         {{ _("Email me the attendance list when I close the session") }}</label>
       <p class="muted small">{{ _("You can add mid-class checks and a check-out while the class is running.") }}</p>
-      <button type="submit" class="large">{{ _("Start and show QR code") }}</button>
+      <button type="submit" class="large">{{ _("Start session") }}</button>
     </form>
   </section>
 
@@ -50,7 +50,7 @@
     <ul class="session-list">
       {% for s in sessions %}
       <li>
-        <a href="{{ url('/sessions/' ~ s.id ~ ('/report' if s.is_closed else '')) }}">
+        <a href="{{ url('/sessions/' ~ s.id ~ '/report') }}">
           <strong>{{ s.class_name or _("Class session") }}</strong>
           <span class="muted">{{ local(s.created_at, '%d %b %Y, %H:%M') }}</span>
         </a>

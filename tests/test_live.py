@@ -66,6 +66,8 @@ def test_live_flow(app):  # noqa: F811
         login(app, t, TEACHER, "Dr Teacher")
         sid, _ = start_session(app, t)
         h = {"X-CSRF-Token": csrf(t, "/attendance/")}
+        report = t.get(f"/attendance/sessions/{sid}/report").text
+        assert 'id="btn-ask"' in report and 'id="composer"' in report
         info = t.get(f"/attendance/sessions/{sid}/live").json()
         assert info["activity"] is None and "<svg" in info["join_qr"]
         join = re.sub(r"^http://testserver", "", info["join_url"])
@@ -88,8 +90,9 @@ def test_live_flow(app):  # noqa: F811
             assert [o["count"] for o in res["options"]] == [0, 1]
             assert STUDENT not in str(res)  # the screen is anonymous
 
-            # Short answers, grouped
-            r = t.post(f"/attendance/sessions/{sid}/live", headers=h, data={"kind": "text", "question": "One word?"})
+            # Short answers, grouped; the question text is optional.
+            r = t.post(f"/attendance/sessions/{sid}/live", headers=h, data={"kind": "text", "question": ""})
+            assert r.status_code == 200 and r.json()["activity"]["question"] == ""
             act = r.json()["activity"]
             s.post(join + "/answer", headers=sh, data={"activity": act["id"], "text": "Voltage"})
             s.post(join + "/answer", headers=sh, data={"activity": act["id"], "text": "voltage!"})

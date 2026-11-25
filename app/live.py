@@ -75,9 +75,7 @@ class LiveStore:
     def start(self, session_id: int, kind: str, question: str, options: list[str], chart: str = "bar") -> dict:
         if kind not in KINDS:
             raise ValueError("Unknown activity type.")
-        question = " ".join(question.split())[:MAX_QUESTION_LEN]
-        if not question:
-            raise ValueError("Type a question first.")
+        question = " ".join(question.split())[:MAX_QUESTION_LEN]  # optional: the teacher may just ask aloud
         options = [" ".join(o.split())[:MAX_OPTION_LEN] for o in options]
         options = [o for o in options if o][:MAX_OPTIONS]
         if kind == "vote" and len(options) < 2:

@@ -68,7 +68,8 @@
       $("v-question").classList.add("pop");
     }
     $("q-kind").textContent = a.kind === "vote" ? t("Vote") : t("Short answer");
-    $("q-text").textContent = a.question;
+    $("q-text").textContent = a.question || t("Answer the question your teacher asks.");
+    $("q-text").classList.toggle("muted", !a.question);
     a.kind === "vote" ? renderVote(a) : renderText(a);
   }
 

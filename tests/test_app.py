@@ -65,7 +65,7 @@ def start_session(app, c, **opts):
     data.update(opts)
     r = c.post("/attendance/sessions", data=data)
     assert r.status_code == 200
-    sid = int(re.search(r"/sessions/(\d+)$", str(r.url)).group(1))
+    sid = int(re.search(r"/sessions/(\d+)/report$", str(r.url)).group(1))
     state = c.get(f"/attendance/sessions/{sid}/state").json()
     return sid, state
 

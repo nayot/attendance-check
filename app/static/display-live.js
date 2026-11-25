@@ -44,13 +44,13 @@
     app.classList.toggle("live-mode", !!a);
     $("live-stage").hidden = !a;
     $("live-controls").hidden = !a;
-    $("btn-live").textContent = "✦ " + t(a ? "New question" : "Ask the class");
     if (!a) { built = ""; return; }
     if (!qrLoaded) load();
     if (!prev || prev.id !== a.id) built = "";
 
     $("live-kind").innerHTML = a.kind === "vote" ? `📊 ${t("Vote")}` : `💬 ${t("Short answer")}`;
     $("live-question").textContent = a.question;
+    $("live-question").hidden = !a.question;
     $("live-people").textContent = a.people;
     $("live-state").textContent = a.open ? t("Answers open") : t("Answers closed");
     $("live-state").className = `live-state ${a.open ? "open" : "closed"}`;
@@ -196,98 +196,19 @@
     box.replaceChildren(...els);
   }
 
-  // ---- Composer ---------------------------------------------------------
-
-  const dlg = $("composer");
-  const form = $("composer-form");
-  const FILLS = {
-    yesno: [t("Yes"), t("No")],
-    tf: [t("True"), t("False")],
-    abcd: ["A", "B", "C", "D"],
-    scale: ["1", "2", "3", "4", "5"],
-  };
-
-  function optionRow(value = "") {
-    const li = document.createElement("li");
-    const i = $("c-options").children.length;
-    li.style.setProperty("--c", COLORS[i % COLORS.length]);
-    li.innerHTML = `${shape(i)}<input name="option" maxlength="80" autocomplete="off"><button type="button" class="link x" aria-label="${t("Remove")}">×</button>`;
-    const input = li.querySelector("input");
-    input.value = value;
-    input.placeholder = t("Choice {n}", { n: i + 1 });
-    li.querySelector(".x").onclick = () => {
-      if ($("c-options").children.length > 2) { li.remove(); renumber(); }
-    };
-    return li;
-  }
-
-  function renumber() {
-    [...$("c-options").children].forEach((li, i) => {
-      li.style.setProperty("--c", COLORS[i % COLORS.length]);
-      li.querySelector("svg").outerHTML = shape(i);
-      li.querySelector("input").placeholder = t("Choice {n}", { n: i + 1 });
-    });
-    $("c-add").hidden = $("c-options").children.length >= 8;
-  }
-
-  function setOptions(values) {
-    $("c-options").replaceChildren();
-    values.forEach((v) => $("c-options").appendChild(optionRow(v)));
-    renumber();
-  }
-
-  function syncKind() {
-    const vote = form.kind.value === "vote";
-    $("c-vote").hidden = !vote;
-    $("c-text-note").hidden = vote;
-    $("c-options").querySelectorAll("input").forEach((i) => (i.disabled = !vote));
-  }
-
-  function openComposer() {
-    if (act && act.kind === "text") form.kind.value = "text";
-    form.question.value = "";
-    setOptions(["", "", "", ""]);
-    $("c-error").hidden = true;
-    syncKind();
-    dlg.showModal();
-    form.question.focus();
-  }
-
-  form.querySelectorAll('input[name="kind"]').forEach((r) => (r.onchange = syncKind));
-  form.querySelectorAll(".chip").forEach((c) => (c.onclick = () => setOptions(FILLS[c.dataset.fill])));
-  $("c-add").onclick = () => {
-    if ($("c-options").children.length < 8) {
-      $("c-options").appendChild(optionRow());
-      renumber();
-      $("c-options").lastElementChild.querySelector("input").focus();
-    }
-  };
-  $("c-cancel").onclick = () => dlg.close();
-  form.question.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
-  });
-  form.onsubmit = async (e) => {
-    e.preventDefault();
-    const body = new URLSearchParams(new FormData(form));
-    try {
-      await post("", body);
-      dlg.close();
-    } catch (err) {
-      $("c-error").textContent = err.message;
-      $("c-error").hidden = false;
-    }
-  };
-
   // ---- Toolbar ----------------------------------------------------------
 
   const act_ = (path) => post(path).catch((err) => alert(err.message));
-  $("btn-live").onclick = openComposer;
+  $("btn-live").onclick = () => window.LiveComposer.open(act && act.kind);
   $("btn-bar").onclick = () => act_("/bar");
   $("btn-pie").onclick = () => act_("/pie");
   $("btn-live-open").onclick = () => act_(act && act.open ? "/close" : "/open");
-  $("btn-live-stop").onclick = () => act_("/stop");
+  // Ending a question goes back to the attendance list, not the check-in QR code.
+  $("btn-live-stop").onclick = () => post("/stop").then(() => { location.href = `${base}/sessions/${sid}/report`; },
+                                                       (err) => alert(err.message));
 
   window.addEventListener("live-update", (e) => update(e.detail.activity));
+  window.addEventListener("live-started", (e) => update(e.detail.activity));
   window.addEventListener("live-refresh", load);
   load();
 })();
