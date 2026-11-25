@@ -20,6 +20,7 @@ from .mailer import Mailer
 from .routes_admin import router as admin_router
 from .routes_auth import build_oauth
 from .routes_auth import router as auth_router
+from .routes_live import router as live_router
 from .routes_student import router as student_router
 from .routes_teacher import router as teacher_router
 from .tokens import TokenSigner
@@ -68,7 +69,7 @@ def create_app(config: config_mod.Config | None = None) -> FastAPI:
     )
 
     root = APIRouter(prefix=config.base_path)
-    for r in (auth_router, teacher_router, student_router, admin_router):
+    for r in (auth_router, teacher_router, student_router, live_router, admin_router):
         root.include_router(r)
 
     @root.get("/healthz")

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **Votes and short answers** (like Kahoot or Mentimeter). On the QR display, **Ask the class** starts a vote
+  (2–8 choices, live bar or pie chart) or a short-answer question (live answer cloud: similar answers are grouped
+  and grow with the number of students who gave them). Students join from a QR code on screen or from their
+  check-in page, sign in as usual, and answer on their phone; new questions appear by themselves. Answers are
+  anonymous on screen and held in memory only: nothing is saved.
+
 ## 0.1.3 — 2026-10-27
 
 - **Fix: students could become teachers.** When a teacher domain was also a student domain (staff and students

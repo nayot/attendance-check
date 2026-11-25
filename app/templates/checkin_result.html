@@ -10,6 +10,8 @@
   <p><strong>{{ title }}</strong> · {{ phase_label(r.phase.label) }}</p>
   <p>{{ r.checkin.name }} &lt;{{ r.checkin.email }}&gt;</p>
   {% if r.session.email_students and not r.duplicate %}<p class="muted">{{ _("A confirmation email is on its way.") }}</p>{% endif %}
+  {% if join %}<a class="button large join-live" href="{{ join }}">✦ {{ _("Join class questions") }}</a>
+  <p class="muted small">{{ _("Keep this page open to vote and answer when your teacher asks.") }}</p>{% endif %}
   {% else %}
   <h1>{{ _("Not checked in") }}</h1>
   <p>{{ _(r.message, **r.params) }}</p>

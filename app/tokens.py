@@ -14,6 +14,7 @@ import time
 class TokenSigner:
     def __init__(self, secret: str):
         self._key = hashlib.sha256(("qr:" + secret).encode()).digest()
+        self._live_key = hashlib.sha256(("live:" + secret).encode()).digest()
 
     @staticmethod
     def window(interval: int, now: float | None = None) -> int:
@@ -30,3 +31,11 @@ class TokenSigner:
     def verify(self, phase_id: int, token: str, interval: int, now: float | None = None) -> bool:
         w = self.window(interval, now)
         return any(hmac.compare_digest(self.token(phase_id, x), token) for x in (w, w - 1))
+
+    def live_token(self, session_id: int) -> str:
+        """Stable, unguessable join code for a session's live activities (votes, short answers)."""
+        mac = hmac.new(self._live_key, str(session_id).encode(), hashlib.sha256).digest()
+        return base64.urlsafe_b64encode(mac[:9]).decode()
+
+    def verify_live(self, session_id: int, token: str) -> bool:
+        return hmac.compare_digest(self.live_token(session_id), token)

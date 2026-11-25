@@ -8,6 +8,7 @@
     <li><a href="#start">Starting a class session</a></li>
     <li><a href="#display">The QR display</a></li>
     <li><a href="#checks">Mid-class checks and check-out</a></li>
+    <li><a href="#live">Votes and short answers</a></li>
     <li><a href="#close">Closing a session</a></li>
     <li><a href="#report">Attendance list and corrections</a></li>
     <li><a href="#archive">Archiving and deleting sessions</a></li>
@@ -72,11 +73,29 @@
     <li>Students scan the same screen again for every check.</li>
   </ul>
 
-  <h2 id="close">7. Closing a session</h2>
+  <h2 id="live">7. Votes and short answers</h2>
+  <p>Ask the class a question during the session, like Kahoot or Mentimeter. Nothing is saved: answers are shown
+    without names and are gone when you end the question or close the session.</p>
+  <ul>
+    <li>On the QR display, click <b>✦ Ask the class</b>. Choose <b>Vote</b> (2 to 8 choices, shown as a bar or pie
+      chart) or <b>Short answer</b>, type the question and click <b>Start</b>. The chips <b>Yes / No</b>,
+      <b>True / False</b>, <b>A B C D</b> and <b>1–5</b> fill in the choices for you.</li>
+    <li>The screen shows the question, a QR code to join and the results as they come in. Students who have already
+      checked in can also tap <b>Join class questions</b> on their check-in page and keep that page open: each new
+      question appears on their phone by itself.</li>
+    <li>A vote counts once per student. Students may change their vote until you click <b>Stop answers</b>.
+      Switch between <b>Bar</b> and <b>Pie</b> at any time.</li>
+    <li>For a short answer, each student can send up to 3 answers. Answers that differ only in capitals, spaces,
+      punctuation or a small typo are grouped, and the more often an answer is given, the bigger it shows.</li>
+    <li><b>New question</b> replaces the current one; <b>End question</b> takes you back to the attendance QR code.
+      Check-in keeps running in the background while a question is on screen.</li>
+  </ul>
+
+  <h2 id="close">8. Closing a session</h2>
   <p>Click <b>Close session</b> when class ends. Students can no longer check in. If you chose it, the attendance
     list is emailed to you as a table in the message, which is easy to paste into a spreadsheet or an AI assistant. You are taken to the attendance list.</p>
 
-  <h2 id="report">8. Attendance list and corrections</h2>
+  <h2 id="report">9. Attendance list and corrections</h2>
   <ul>
     <li>Open a session from the dashboard to see one row per student with their time for each check. A red dash
       means they missed that check.</li>
@@ -87,7 +106,7 @@
     <li><b>Remove a check-in</b>: remove a mistaken entry.</li>
   </ul>
 
-  <h2 id="archive">9. Archiving and deleting sessions</h2>
+  <h2 id="archive">10. Archiving and deleting sessions</h2>
   <ul>
     <li>Click <b>…</b> next to a session on the dashboard.</li>
     <li><b>Archive</b> hides it from <b>Your sessions</b> but keeps everything. Find it under <b>Archived</b> and use
@@ -95,7 +114,7 @@
     <li><b>Delete</b> removes the session and all its check-ins permanently.</li>
   </ul>
 
-  <h2 id="students">10. What students do</h2>
+  <h2 id="students">11. What students do</h2>
   <ol>
     <li>Open the phone camera and point it at the QR code, then tap the link.</li>
     <li>The first time, sign in with Google{% if domains %} using their <b>{{ domains }}</b> account{% endif %}. The
@@ -103,7 +122,7 @@
     <li>A green tick with the time confirms the check-in. A confirmation email follows if you chose that.</li>
   </ol>
 
-  <h2 id="problems">11. Common problems</h2>
+  <h2 id="problems">12. Common problems</h2>
   <dl>
     <dt>"QR code expired"</dt>
     <dd>The student opened an old code, for example from a photo. Ask them to scan the screen again.</dd>
@@ -122,7 +141,7 @@
   </dl>
 
   {% if is_admin %}
-  <h2 id="admin">12. For administrators</h2>
+  <h2 id="admin">13. For administrators</h2>
   <p><b>Settings</b> (top right) controls the institution name, logos, accent colour, default language, allowed
     student email domains, teachers (by domain or one by one), time zone, how often the QR code changes, and
     whether new sessions email students and teachers by default. Changes take effect immediately.</p>

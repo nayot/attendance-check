@@ -128,11 +128,12 @@
   // Live updates
   function connect() {
     const es = new EventSource(`${base}/sessions/${sid}/events`);
-    es.onopen = () => { $("conn").className = "conn on"; refresh(); };
+    es.onopen = () => { $("conn").className = "conn on"; refresh(); window.dispatchEvent(new Event("live-refresh")); };
     es.onerror = () => { $("conn").className = "conn off"; };
     es.addEventListener("qr", (e) => onQr(JSON.parse(e.data)));
     es.addEventListener("checkin", (e) => onCheckin(JSON.parse(e.data)));
     es.addEventListener("state", () => refresh());
+    es.addEventListener("live", (e) => window.dispatchEvent(new CustomEvent("live-update", { detail: JSON.parse(e.data) })));
   }
 
   // Buttons
@@ -157,8 +158,8 @@
     if (!confirm(t("Close this session? Students can no longer check in."))) e.preventDefault();
   };
   document.addEventListener("keydown", (e) => {
-    if (e.target.tagName === "INPUT") return;
-    if (e.key === " ") { e.preventDefault(); $("btn-pause").click(); }
+    if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName) || document.querySelector("dialog[open]")) return;
+    if (e.key === " " && !app.classList.contains("live-mode")) { e.preventDefault(); $("btn-pause").click(); }
     if (e.key === "f") $("btn-full").click();
   });
 

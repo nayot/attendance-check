@@ -14,7 +14,11 @@ router = APIRouter()
 
 
 def _result(request: Request, r: att.CheckInResult, status_code: int = 200):
-    return render(request, "checkin_result.html", status_code, r=r,
+    s = svc(request)
+    join = None
+    if r.ok and r.session and not r.session.is_closed:
+        join = s.url(f"/live/{r.session.id}/{s.signer.live_token(r.session.id)}")
+    return render(request, "checkin_result.html", status_code, r=r, join=join,
                   title=att.session_title(r.session, language(request)) if r.session else "")
 
 

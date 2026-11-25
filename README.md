@@ -8,6 +8,8 @@ A small self-hosted web app that lets teachers take class attendance with a rota
 - The QR code changes every few seconds, so a photo sent to a friend outside the room soon stops working.
 - **Pause** stops check-in instantly. The QR code is hidden, and codes already scanned are rejected.
 - Add **mid-class checks** and a **check-out** when you set up the session or while class is running.
+- **Ask the class**: live votes (bar or pie chart) and short answers (similar answers grouped into an answer cloud),
+  answered on students' phones, like Kahoot or Mentimeter. Anonymous on screen and not saved.
 - Each student gets a confirmation email, sent from the teacher's own Gmail / Google Workspace address
   (or from a shared SMTP account). When the session closes, the teacher gets the list by email as a
   table in the message body (no attachment), easy to paste into a spreadsheet or hand to an AI assistant. The list can also be downloaded or corrected by hand.

@@ -1,7 +1,7 @@
 """Shared request helpers: services, templates, auth guards and CSRF."""
 
 import secrets
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
@@ -14,6 +14,7 @@ from . import settings as settings_mod
 from .config import Config
 from .db import Database
 from .events import Broker
+from .live import LiveStore
 from .mailer import Mailer
 from .tokens import TokenSigner
 
@@ -27,6 +28,7 @@ class Services:
     mailer: Mailer
     broker: Broker
     signer: TokenSigner
+    live: LiveStore = field(default_factory=LiveStore)
 
     def settings(self) -> settings_mod.Settings:
         return settings_mod.load(self.db)

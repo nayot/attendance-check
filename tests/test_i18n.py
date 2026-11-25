@@ -38,7 +38,8 @@ def python_strings():
 
 
 def test_all_ui_strings_translated():
-    found = list(template_strings()) + list(python_strings()) + [("display.js", s) for s in i18n.DISPLAY_STRINGS]
+    found = (list(template_strings()) + list(python_strings())
+             + [("display.js", s) for s in i18n.DISPLAY_STRINGS] + [("live.js", s) for s in i18n.LIVE_STRINGS])
     missing = sorted({f"{where}: {s}" for where, s in found if s not in i18n.TH})
     assert not missing, "Missing Thai translations:\n" + "\n".join(missing)
 

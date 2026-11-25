@@ -182,6 +182,7 @@ def phase_add(request: Request, session_id: int, kind: str = Form(...), open_now
 def session_close(request: Request, session_id: int, user: dict = Depends(require_teacher)):
     own_session(request, session_id, user)
     att.close_session(svc(request), session_id)
+    svc(request).live.end_session(session_id)
     return RedirectResponse(svc(request).url(f"/sessions/{session_id}/report"), status_code=303)
 
 
@@ -193,6 +194,8 @@ def session_manage(request: Request, session_id: int, action: str, user: dict = 
     s = svc(request)
     own_session(request, session_id, user)
     was_archived = att.manage_session(s, session_id, action)
+    if action != "unarchive":
+        s.live.end_session(session_id)
     back = "/?archived=1" if was_archived and action != "unarchive" else "/"
     return RedirectResponse(s.url(back), status_code=303)
 

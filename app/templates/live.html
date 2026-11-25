@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block body_class %}live-body{% endblock %}
+{% block main_class %}page narrow live-page{% endblock %}
+{% block content %}
+<div id="live" data-base="{{ url('') }}" data-join="{{ join }}" data-csrf="{{ csrf }}" data-ended="{{ 1 if ended else 0 }}">
+  <p class="live-class">{{ title }}</p>
+
+  <section class="live-card live-wait" id="v-wait" hidden>
+    <div class="live-pulse" aria-hidden="true"><span></span><span></span><span></span></div>
+    <h1>{{ _("Get ready!") }}</h1>
+    <p class="muted">{{ _("The next question will appear here by itself. Keep this page open.") }}</p>
+  </section>
+
+  <section class="live-card live-wait" id="v-ended" hidden>
+    <div class="live-done-icon" aria-hidden="true">✓</div>
+    <h1>{{ _("Class has ended") }}</h1>
+    <p class="muted">{{ _("Thanks for taking part.") }}</p>
+  </section>
+
+  <section id="v-question" hidden>
+    <div class="live-q-kind" id="q-kind"></div>
+    <h1 class="live-question" id="q-text"></h1>
+    <div class="live-status" id="q-status" role="status" aria-live="polite"></div>
+    <div class="vote-tiles" id="q-options"></div>
+    <form class="answer-form" id="q-form" hidden>
+      <input id="q-input" autocomplete="off" enterkeyhint="send" placeholder="{{ _('Type a short answer') }}">
+      <div class="answer-row">
+        <span class="muted small" id="q-left"></span>
+        <button type="submit" class="large" id="q-send">{{ _("Send") }}</button>
+      </div>
+    </form>
+    <ul class="my-answers" id="q-mine"></ul>
+  </section>
+
+  <p class="error" id="live-error" hidden></p>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.I18N = {
+    {%- for key in live_strings %}
+    {{ key | tojson }}: {{ _(key) | tojson }},
+    {%- endfor %}
+  };
+</script>
+<script src="{{ url('/static/live-common.js') }}"></script>
+<script src="{{ url('/static/live.js') }}"></script>
+{% endblock %}
