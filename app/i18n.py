@@ -114,7 +114,7 @@ TH = {
     "+ Mid-class check": "+ เช็คชื่อระหว่างคาบ",
     "+ Check-out": "+ เช็คชื่อออก",
     "Full screen": "เต็มจอ",
-    "List": "รายชื่อ",
+    "Back": "กลับ",
     "Close session": "ปิดคาบเรียน",
     "Live connection": "การเชื่อมต่อสด",
     "Checks in this session": "การเช็คชื่อในคาบนี้",
