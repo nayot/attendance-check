@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-11-26
 
 - A new session opens on its **attendance list**, not the QR code, so the code is shown only when the teacher
   chooses (**Show check-in QR code**). The dashboard also opens running sessions on their list.
