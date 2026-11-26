@@ -310,6 +310,9 @@ TH = {
     "This link is not valid.": "ลิงก์นี้ใช้ไม่ได้",
     "Please sign in again.": "กรุณาเข้าสู่ระบบอีกครั้ง",
     "Show check-in QR code": "แสดง QR code เช็คชื่อ",
+    "End of class": "จบคาบเรียน",
+    "Closing the session stops check-in and ends any question on screen. It cannot be reopened.":
+        "การปิดคาบเรียนจะหยุดการเช็คชื่อและจบคำถามที่แสดงอยู่ และเปิดคาบนี้อีกไม่ได้",
     "Show the question": "แสดงคำถาม",
     "Start session": "เริ่มคาบเรียน",
     "Answer the question your teacher asks.": "ตอบคำถามที่อาจารย์ถาม",
@@ -364,7 +367,6 @@ DISPLAY_STRINGS = [
     "Choose a check above to open it", "Showing this check", "Click to open this check",
     'Start "{label}"?', 'Reopen "{label}"?', 'This closes "{label}".', "Checked in",
     "Add a mid-class check and open it now?", "Add a check-out and open it now?",
-    "Close this session? Students can no longer check in.",
     # static/display-live.js
     "Ask the class", "New question", "Vote", "Short answer", "Answers open", "Answers closed", "Stop answers",
     "Reopen answers", "votes", "Answers will appear here", "Yes", "No", "True", "False", "Remove", "Choice {n}",

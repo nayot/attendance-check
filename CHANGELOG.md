@@ -4,6 +4,7 @@
 
 - A new session opens on its **attendance list**, not the QR code, so the code is shown only when the teacher
   chooses (**Show check-in QR code**). The dashboard also opens running sessions on their list.
+- **Close session** is only on the attendance list, set apart at the bottom, no longer on the class screen.
 - **Votes and short answers** (like Kahoot or Mentimeter). On the attendance list, **Ask the class** starts a vote
   (2–8 choices, live bar or pie chart) or a short-answer question (live answer cloud: similar answers are grouped
   and grow with the number of students who gave them). Students join from a QR code on screen or from their

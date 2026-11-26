@@ -154,9 +154,6 @@
     if (document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen();
   };
-  $("close-form").onsubmit = (e) => {
-    if (!confirm(t("Close this session? Students can no longer check in."))) e.preventDefault();
-  };
   document.addEventListener("keydown", (e) => {
     if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName) || document.querySelector("dialog[open]")) return;
     if (e.key === " " && !app.classList.contains("live-mode")) { e.preventDefault(); $("btn-pause").click(); }

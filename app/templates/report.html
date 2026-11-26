@@ -72,6 +72,19 @@
     </ul>
   </details>
 </section>
+{% if not sess.is_closed %}
+<section class="card danger-zone">
+  <div>
+    <h2>{{ _("End of class") }}</h2>
+    <p class="muted small">{{ _("Closing the session stops check-in and ends any question on screen. It cannot be reopened.") }}</p>
+  </div>
+  <form method="post" action="{{ url('/sessions/' ~ sess.id ~ '/close') }}"
+        data-confirm="{{ _('Close this session? Students can no longer check in.') }}">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <button type="submit" class="danger">{{ _("Close session") }}</button>
+  </form>
+</section>
+{% endif %}
 <p><a href="{{ url('/') }}">{{ _("← All sessions") }}</a></p>
 {% if not sess.is_closed %}{% include "live_composer.html" %}{% endif %}
 {% endblock %}
@@ -88,6 +101,8 @@
 <script src="{{ url('/static/live-composer.js') }}"></script>
 <script>
   document.getElementById("btn-ask").onclick = () => window.LiveComposer.open();
+  document.querySelectorAll("form[data-confirm]").forEach((f) =>
+    f.addEventListener("submit", (e) => { if (!confirm(f.dataset.confirm)) e.preventDefault(); }));
   // The question goes on the class screen.
   window.addEventListener("live-started", () => { location.href = {{ url('/sessions/' ~ sess.id) | tojson }}; });
 </script>

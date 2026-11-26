@@ -365,3 +365,10 @@ a.join-live { margin-top: 1rem; background: linear-gradient(135deg, #6a4ce2, #25
   .pie-wrap { height: 16rem; }
   .pie-legend { max-width: 100%; }
 }
+
+/* Close session: kept apart on the attendance list, never on the class screen */
+.danger-zone { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem;
+  border-color: #fecdca; background: #fffbfa; }
+.danger-zone h2 { margin: 0 0 .25rem; color: var(--bad); }
+.danger-zone p { margin: 0; }
+.danger-zone form { margin: 0; }

@@ -73,10 +73,6 @@
     {% include "lang_switch.html" %}
     <span class="conn" id="conn" title="{{ _('Live connection') }}"></span>
     <a class="button secondary" href="{{ url('/sessions/' ~ sess.id ~ '/report') }}">{{ _("List") }}</a>
-    <form method="post" action="{{ url('/sessions/' ~ sess.id ~ '/close') }}" id="close-form">
-      <input type="hidden" name="csrf" value="{{ csrf }}">
-      <button type="submit" class="danger">{{ _("Close session") }}</button>
-    </form>
   </footer>
   {% include "live_composer.html" %}
 </div>
