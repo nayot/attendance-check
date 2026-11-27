@@ -1,5 +1,12 @@
 # Handover
 
+## 27.11.2026
+
+- **Break timer** deployed on eng-ai (unreleased; CHANGELOG "Unreleased"): ☕ Break on the list and class screen,
+  countdown, +/−1 min, End break, chime at zero (needs one click on the class screen to allow sound).
+  Not yet seen in a real browser: check it on the projector before class.
+- On campus network no VPN is needed; this Mac has no `eng-ai` ssh alias, use `eng-ai.buu.ac.th`.
+
 ## 26.11.2026
 
 **State**
