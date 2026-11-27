@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 — 2026-11-27
 
 - **Break timer.** **☕ Break** on the attendance list starts a countdown (5, 10, 15, 20 minutes or any length up to
   120) shown full screen over the list with the time to be back, **+ 1 min** / **− 1 min** and
