@@ -134,13 +134,13 @@ def test_break_flow(app):  # noqa: F811
         login(app, t, TEACHER, "Dr Teacher")
         sid, _ = start_session(app, t)
         h = {"X-CSRF-Token": csrf(t, "/attendance/")}
-        assert 'id="btn-break"' in t.get(f"/attendance/sessions/{sid}/report").text
-        assert 'id="break-stage"' in t.get(f"/attendance/sessions/{sid}").text
+        report = t.get(f"/attendance/sessions/{sid}/report").text
+        assert 'id="btn-break"' in report and 'id="break-overlay"' in report
+        assert "break" not in t.get(f"/attendance/sessions/{sid}").text  # not on the class screen
         assert t.get(f"/attendance/sessions/{sid}/break").json() == {"break": None}
         assert t.post(f"/attendance/sessions/{sid}/break", headers=h, data={"minutes": 0}).status_code == 400
         b = t.post(f"/attendance/sessions/{sid}/break", headers=h, data={"minutes": 15}).json()["break"]
         assert round(b["ends_at"] - b["started_at"]) == 900
-        assert "Show the break timer" in t.get(f"/attendance/sessions/{sid}/report").text
         more = t.post(f"/attendance/sessions/{sid}/break/more", headers=h).json()["break"]
         assert round(more["ends_at"] - b["ends_at"]) == 60
         assert t.post(f"/attendance/sessions/{sid}/break/bogus", headers=h).status_code == 404

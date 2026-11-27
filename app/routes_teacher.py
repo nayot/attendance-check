@@ -209,8 +209,7 @@ def report(request: Request, session_id: int, user: dict = Depends(require_teach
     phases, rows = att.roster(sess)
     return render(request, "report.html", sess=sess, title=att.session_title(sess, language(request)), phases=phases,
                   rows=rows, all_phases=sess.phases, display_strings=i18n.DISPLAY_STRINGS,
-                  live_running=svc(request).live.results(session_id) is not None,
-                  break_running=svc(request).breaks.get(session_id) is not None)
+                  live_running=svc(request).live.results(session_id) is not None)
 
 
 @router.get("/sessions/{session_id}/report.csv")

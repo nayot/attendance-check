@@ -1,9 +1,7 @@
-// Class screen: break countdown, with a chime when the break is over.
+// Break countdown over the attendance list, with a chime when the break is over.
 (() => {
-  const app = document.getElementById("app");
-  const base = app.dataset.base;
-  const sid = app.dataset.session;
-  const csrf = app.dataset.csrf;
+  const box = document.getElementById("break-overlay");
+  const { base, session: sid, csrf } = box.dataset;
   const { t } = window.LiveKit;
   const $ = (id) => document.getElementById(id);
 
@@ -30,11 +28,10 @@
     if (b) skew = b.now * 1000 - Date.now();
     if (!b || !brk || b.started_at !== brk.started_at) wasOver = null;
     brk = b;
-    app.classList.toggle("break-mode", !!b);
-    $("break-stage").hidden = !b;
-    $("break-controls").hidden = !b;
-    $("btn-break").hidden = !!b;
+    box.hidden = !b;
+    document.body.classList.toggle("on-break", !!b);
     if (b) tick();
+    else if (document.fullscreenElement) document.exitFullscreen();
   }
 
   function clock(ms) {
@@ -66,8 +63,8 @@
   }
 
   // ---- Chime -------------------------------------------------------------
-  // Browsers only allow sound after someone has clicked on the page, so the
-  // audio is unlocked on the first click or key press.
+  // Browsers only allow sound after a click on the page. Starting the break
+  // from this page is such a click; after a reload, "Turn on the chime" is.
   let audio = null;
   function unlock() {
     try {
@@ -94,16 +91,17 @@
     });
   }
 
-  // ---- Toolbar -----------------------------------------------------------
+  // ---- Controls ----------------------------------------------------------
   $("break-sound").onclick = unlock;
-  $("btn-break").onclick = () => window.BreakDialog.open();
   $("btn-break-more").onclick = () => post("/more");
   $("btn-break-less").onclick = () => post("/less");
   $("btn-break-end").onclick = () => post("/end");
+  $("btn-break-full").onclick = () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else box.requestFullscreen();
+  };
 
-  window.addEventListener("break-update", (e) => update(e.detail.break));
   window.addEventListener("break-started", (e) => update(e.detail.break));
-  window.addEventListener("live-refresh", load);
   setInterval(tick, 250);
   load();
 })();

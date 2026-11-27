@@ -1,0 +1,16 @@
+<div class="break-overlay" id="break-overlay" data-base="{{ url('') }}" data-session="{{ sess.id }}" data-csrf="{{ csrf }}" hidden>
+  <section class="break-stage" id="break-stage">
+    <div class="break-label" id="break-label"></div>
+    <div class="break-time" id="break-time"></div>
+    <div class="break-bar"><div id="break-bar"></div></div>
+    <p class="break-back" id="break-back"></p>
+    <button type="button" class="secondary break-sound" id="break-sound" hidden>🔔 {{ _("Turn on the chime") }}</button>
+  </section>
+  <footer class="toolbar break-toolbar">
+    <button type="button" id="btn-break-less" class="secondary">− {{ _("1 min") }}</button>
+    <button type="button" id="btn-break-more" class="secondary">+ {{ _("1 min") }}</button>
+    <button type="button" id="btn-break-full" class="secondary">⛶ {{ _("Full screen") }}</button>
+    <span class="spacer"></span>
+    <button type="button" id="btn-break-end">■ {{ _("End break") }}</button>
+  </footer>
+</div>
