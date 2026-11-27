@@ -2,7 +2,7 @@
 
 ## 27.11.2026
 
-- **Break timer** deployed on eng-ai (unreleased; CHANGELOG "Unreleased"): ☕ Break on the attendance list (pops up over the list, not the class screen),
+- **0.3.0 released** (GitHub release v0.3.0) and deployed on eng-ai. **Break timer**: ☕ Break on the attendance list (pops up over the list, not the class screen),
   countdown, +/−1 min, End break, chime at zero (needs one click on the class screen to allow sound).
   Not yet seen in a real browser: check it on the projector before class.
 - On campus network no VPN is needed; this Mac has no `eng-ai` ssh alias, use `eng-ai.buu.ac.th`.
