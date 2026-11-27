@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Break timer.** **☕ Break** on the attendance list or the class screen starts a countdown (5, 10, 15, 20 minutes or
+  any length up to 120) shown large on the class screen with the time to be back, **+ 1 min** / **− 1 min** and
+  **End break**. At zero the screen shows **Break is over** with a chime. Held in memory only, like live questions.
+
 ## 0.2.0 — 2026-11-26
 
 - A new session opens on its **attendance list**, not the QR code, so the code is shown only when the teacher

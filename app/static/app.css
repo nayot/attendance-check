@@ -372,3 +372,30 @@ a.join-live { margin-top: 1rem; background: linear-gradient(135deg, #6a4ce2, #25
 .danger-zone h2 { margin: 0 0 .25rem; color: var(--bad); }
 .danger-zone p { margin: 0; }
 .danger-zone form { margin: 0; }
+
+/* ---- Break timer ----------------------------------------------------------- */
+.break-controls { display: inline-flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+.break-controls[hidden], #btn-break[hidden] { display: none; }
+#app.break-mode .stage, #app.break-mode .phases, #app.break-mode .att-controls,
+#app.break-mode .live-stage, #app.break-mode .live-controls { display: none; }
+.break-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;
+  min-height: 0; border-radius: 24px; background: linear-gradient(160deg, #fff8ec, #eef6ff); text-align: center; }
+.break-stage[hidden] { display: none; }
+.break-label { font-size: clamp(1.8rem, 4vw, 3.2rem); font-weight: 800; color: #8a4b00; }
+.break-time { font-size: clamp(6rem, 24vw, 22rem); line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em; color: #191919; }
+.break-bar { width: min(80%, 60rem); height: 14px; background: rgb(0 0 0 / .08); border-radius: 7px; overflow: hidden; }
+#break-bar { height: 100%; background: #f2a600; transition: width .25s linear; }
+.break-back { margin: 0; font-size: clamp(1.4rem, 3vw, 2.6rem); font-weight: 600; color: #3b3b3b; }
+.break-stage.soon .break-time { color: #c4531a; }
+.break-stage.soon #break-bar { background: #f47230; }
+.break-stage.over { background: linear-gradient(160deg, #fde7e7, #fff4f0); }
+.break-stage.over .break-label { color: var(--bad); font-size: clamp(2.6rem, 7vw, 6rem); }
+.break-stage.over .break-time { color: var(--bad); animation: blink 1.4s infinite; }
+.break-sound { font-size: .9rem; }
+.break-sound[hidden] { display: none; }
+.break-presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem; }
+.break-presets button { font-size: 1.3rem; font-weight: 700; padding: .9rem .5rem; }
+.break-custom-row { display: flex; gap: .6rem; }
+.break-custom-row input { width: 7rem; font-size: 1.1rem; }
+@media (max-width: 520px) { .break-presets { grid-template-columns: repeat(2, 1fr); } }

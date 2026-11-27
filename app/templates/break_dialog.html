@@ -1,0 +1,19 @@
+<dialog class="composer break-dialog" id="break-dialog" data-base="{{ url('') }}" data-session="{{ sess.id }}" data-csrf="{{ csrf }}">
+  <form id="break-form" method="dialog">
+    <h2>☕ {{ _("Break") }}</h2>
+    <div class="break-presets">
+      {% for m in (5, 10, 15, 20) %}<button type="button" class="secondary" data-minutes="{{ m }}">{{ _("{n} min", n=m) }}</button>{% endfor %}
+    </div>
+    <label class="break-custom"><span>{{ _("Other length (minutes)") }}</span>
+      <span class="break-custom-row">
+        <input type="number" name="minutes" min="1" max="120" step="1" value="10" required>
+        <button type="submit">▶ {{ _("Start break") }}</button>
+      </span>
+    </label>
+    <p class="muted small">{{ _("The countdown is shown on the class screen, with a chime when the break is over. Check-in is not changed.") }}</p>
+    <p class="error" id="break-error" hidden></p>
+    <div class="c-actions">
+      <button type="button" class="secondary" id="break-cancel">{{ _("Cancel") }}</button>
+    </div>
+  </form>
+</dialog>

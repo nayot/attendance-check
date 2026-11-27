@@ -13,6 +13,8 @@
       <a class="button" href="{{ url('/sessions/' ~ sess.id) }}">{{ _("Show check-in QR code") }}</a>
       {% if live_running %}<a class="button ask" href="{{ url('/sessions/' ~ sess.id) }}">✦ {{ _("Show the question") }}</a>{% endif %}
       <button type="button" class="ask" id="btn-ask">✦ {{ _("Ask the class") }}</button>
+      {% if break_running %}<a class="button secondary" href="{{ url('/sessions/' ~ sess.id) }}">☕ {{ _("Show the break timer") }}</a>
+      {% else %}<button type="button" class="secondary" id="btn-break">☕ {{ _("Break") }}</button>{% endif %}
       {% endif %}
       <a class="button secondary" href="{{ url('/sessions/' ~ sess.id ~ '/report.csv') }}">{{ _("Download CSV") }}</a>
       <form method="post" action="{{ url('/sessions/' ~ sess.id ~ '/report/email') }}">
@@ -86,7 +88,7 @@
 </section>
 {% endif %}
 <p><a href="{{ url('/') }}">{{ _("← All sessions") }}</a></p>
-{% if not sess.is_closed %}{% include "live_composer.html" %}{% endif %}
+{% if not sess.is_closed %}{% include "live_composer.html" %}{% include "break_dialog.html" %}{% endif %}
 {% endblock %}
 {% block scripts %}
 {% if not sess.is_closed %}
@@ -99,12 +101,16 @@
 </script>
 <script src="{{ url('/static/live-common.js') }}"></script>
 <script src="{{ url('/static/live-composer.js') }}"></script>
+<script src="{{ url('/static/break-dialog.js') }}"></script>
 <script>
   document.getElementById("btn-ask").onclick = () => window.LiveComposer.open();
+  document.getElementById("btn-break")?.addEventListener("click", () => window.BreakDialog.open());
   document.querySelectorAll("form[data-confirm]").forEach((f) =>
     f.addEventListener("submit", (e) => { if (!confirm(f.dataset.confirm)) e.preventDefault(); }));
   // The question goes on the class screen.
   window.addEventListener("live-started", () => { location.href = {{ url('/sessions/' ~ sess.id) | tojson }}; });
+  // So is the break timer.
+  window.addEventListener("break-started", () => { location.href = {{ url('/sessions/' ~ sess.id) | tojson }}; });
 </script>
 {% endif %}
 {% endblock %}

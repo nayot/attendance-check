@@ -74,6 +74,44 @@ def live_action(request: Request, session_id: int, action: str, user: dict = Dep
     return _publish(request, session_id, store.update(session_id, **changes))
 
 
+# --- Break timer ----------------------------------------------------------
+
+def _publish_break(request: Request, session_id: int, data: dict | None) -> dict:
+    svc(request).broker.publish(session_id, "break", {"break": data})
+    return {"break": data}
+
+
+@router.get("/sessions/{session_id}/break")
+def break_state(request: Request, session_id: int, user: dict = Depends(require_teacher)):
+    own_session(request, session_id, user)
+    return JSONResponse({"break": svc(request).breaks.get(session_id)}, headers={"Cache-Control": "no-store"})
+
+
+@router.post("/sessions/{session_id}/break", dependencies=[Depends(check_csrf)])
+def break_start(request: Request, session_id: int, minutes: int = Form(...), user: dict = Depends(require_teacher)):
+    sess = own_session(request, session_id, user)
+    if sess.is_closed:
+        raise HTTPException(400, "This session is closed.")
+    try:
+        data = svc(request).breaks.start(session_id, minutes)
+    except ValueError as exc:
+        raise _error(request, exc)
+    return _publish_break(request, session_id, data)
+
+
+@router.post("/sessions/{session_id}/break/{action}", dependencies=[Depends(check_csrf)])
+def break_action(request: Request, session_id: int, action: str, user: dict = Depends(require_teacher)):
+    own_session(request, session_id, user)
+    store = svc(request).breaks
+    if action == "end":
+        store.end(session_id)
+        return _publish_break(request, session_id, None)
+    step = {"more": 1, "less": -1}.get(action)
+    if step is None:
+        raise HTTPException(404)
+    return _publish_break(request, session_id, store.adjust(session_id, step))
+
+
 # --- Students -------------------------------------------------------------
 
 def _student(request: Request, session_id: int, token: str) -> dict | None:

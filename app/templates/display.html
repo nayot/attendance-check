@@ -54,6 +54,14 @@
     </div>
   </section>
 
+  <section class="break-stage" id="break-stage" hidden>
+    <div class="break-label" id="break-label"></div>
+    <div class="break-time" id="break-time"></div>
+    <div class="break-bar"><div id="break-bar"></div></div>
+    <p class="break-back" id="break-back"></p>
+    <button type="button" class="secondary break-sound" id="break-sound" hidden>🔔 {{ _("Turn on the chime") }}</button>
+  </section>
+
   <footer class="toolbar">
     <span class="att-controls">
     <button id="btn-pause" class="large">{{ _("Pause") }}</button>
@@ -68,6 +76,12 @@
       <button type="button" id="btn-live-open" class="secondary"></button>
       <button type="button" id="btn-live-stop" class="secondary">■ {{ _("End question") }}</button>
     </span>
+    <button type="button" id="btn-break" class="secondary">☕ {{ _("Break") }}</button>
+    <span class="break-controls" id="break-controls" hidden>
+      <button type="button" id="btn-break-less" class="secondary">− {{ _("1 min") }}</button>
+      <button type="button" id="btn-break-more" class="secondary">+ {{ _("1 min") }}</button>
+      <button type="button" id="btn-break-end">■ {{ _("End break") }}</button>
+    </span>
     <button id="btn-full" class="secondary" title="{{ _('Full screen') }}">⛶ {{ _("Full screen") }}</button>
     <span class="spacer"></span>
     {% include "lang_switch.html" %}
@@ -75,6 +89,7 @@
     <a class="button secondary" href="{{ url('/sessions/' ~ sess.id ~ '/report') }}">← {{ _("Back") }}</a>
   </footer>
   {% include "live_composer.html" %}
+  {% include "break_dialog.html" %}
 </div>
 {% endblock %}
 {% block scripts %}
@@ -90,4 +105,6 @@
 <script src="{{ url('/static/display.js') }}"></script>
 <script src="{{ url('/static/live-composer.js') }}"></script>
 <script src="{{ url('/static/display-live.js') }}"></script>
+<script src="{{ url('/static/break-dialog.js') }}"></script>
+<script src="{{ url('/static/display-break.js') }}"></script>
 {% endblock %}

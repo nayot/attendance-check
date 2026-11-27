@@ -316,6 +316,21 @@ TH = {
     "Show the question": "แสดงคำถาม",
     "Start session": "เริ่มคาบเรียน",
     "Answer the question your teacher asks.": "ตอบคำถามที่อาจารย์ถาม",
+    # Break timer
+    "Break": "พักเบรก",
+    "{n} min": "{n} นาที",
+    "1 min": "1 นาที",
+    "Other length (minutes)": "กำหนดเอง (นาที)",
+    "Start break": "เริ่มพัก",
+    "The countdown is shown on the class screen, with a chime when the break is over. Check-in is not changed.":
+        "จอในห้องเรียนจะแสดงเวลานับถอยหลัง และมีเสียงเตือนเมื่อหมดเวลาพัก การเช็คชื่อไม่เปลี่ยนแปลง",
+    "End break": "จบการพัก",
+    "Show the break timer": "แสดงเวลาพัก",
+    "Turn on the chime": "เปิดเสียงเตือน",
+    "Break is over": "หมดเวลาพักแล้ว",
+    "Please take your seats": "เชิญกลับเข้าที่นั่ง",
+    "Back at {time}": "กลับเข้าห้องเวลา {time} น.",
+    "A break is 1 to 120 minutes long.": "เวลาพักต้องอยู่ระหว่าง 1 ถึง 120 นาที",
 }
 
 CATALOGS = {"th": TH}
@@ -370,6 +385,8 @@ DISPLAY_STRINGS = [
     # static/display-live.js
     "Ask the class", "New question", "Vote", "Short answer", "Answers open", "Answers closed", "Stop answers",
     "Reopen answers", "votes", "Answers will appear here", "Yes", "No", "True", "False", "Remove", "Choice {n}",
+    # static/display-break.js
+    "Break", "Break is over", "Please take your seats", "Back at {time}",
 ]
 
 # Strings used by static/live.js (the student answer page).

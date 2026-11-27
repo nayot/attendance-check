@@ -14,6 +14,7 @@ from . import settings as settings_mod
 from .config import Config
 from .db import Database
 from .events import Broker
+from .breaks import BreakStore
 from .live import LiveStore
 from .mailer import Mailer
 from .tokens import TokenSigner
@@ -29,6 +30,7 @@ class Services:
     broker: Broker
     signer: TokenSigner
     live: LiveStore = field(default_factory=LiveStore)
+    breaks: BreakStore = field(default_factory=BreakStore)
 
     def settings(self) -> settings_mod.Settings:
         return settings_mod.load(self.db)

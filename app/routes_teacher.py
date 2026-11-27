@@ -184,6 +184,7 @@ def session_close(request: Request, session_id: int, user: dict = Depends(requir
     own_session(request, session_id, user)
     att.close_session(svc(request), session_id)
     svc(request).live.end_session(session_id)
+    svc(request).breaks.end(session_id)
     return RedirectResponse(svc(request).url(f"/sessions/{session_id}/report"), status_code=303)
 
 
@@ -197,6 +198,7 @@ def session_manage(request: Request, session_id: int, action: str, user: dict = 
     was_archived = att.manage_session(s, session_id, action)
     if action != "unarchive":
         s.live.end_session(session_id)
+        s.breaks.end(session_id)
     back = "/?archived=1" if was_archived and action != "unarchive" else "/"
     return RedirectResponse(s.url(back), status_code=303)
 
@@ -207,7 +209,8 @@ def report(request: Request, session_id: int, user: dict = Depends(require_teach
     phases, rows = att.roster(sess)
     return render(request, "report.html", sess=sess, title=att.session_title(sess, language(request)), phases=phases,
                   rows=rows, all_phases=sess.phases, display_strings=i18n.DISPLAY_STRINGS,
-                  live_running=svc(request).live.results(session_id) is not None)
+                  live_running=svc(request).live.results(session_id) is not None,
+                  break_running=svc(request).breaks.get(session_id) is not None)
 
 
 @router.get("/sessions/{session_id}/report.csv")

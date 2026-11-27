@@ -104,3 +104,54 @@ def test_live_flow(app):  # noqa: F811
 
             t.post(f"/attendance/sessions/{sid}/close", data={"csrf": h["X-CSRF-Token"]})
             assert s.get(join + "/poll").json() == {"ended": True}
+
+
+def test_break_store():
+    import time as _time
+
+    from app.breaks import BreakStore
+    store = BreakStore()
+    assert store.get(1) is None
+    for bad in (0, 121):
+        try:
+            store.start(1, bad)
+            raise AssertionError(f"{bad} minutes accepted")
+        except ValueError:
+            pass
+    b = store.start(1, 10)
+    assert round(b["ends_at"] - b["started_at"]) == 600
+    assert round(store.adjust(1, 1)["ends_at"] - b["started_at"]) == 660
+    for _ in range(15):
+        b = store.adjust(1, -1)
+    assert b["ends_at"] >= b["started_at"] and b["ends_at"] <= _time.time()  # never before now
+    assert round(store.adjust(1, 1)["ends_at"] - _time.time()) == 60       # extra time counts from now
+    store.end(1)
+    assert store.get(1) is None and store.adjust(1, 1) is None
+
+
+def test_break_flow(app):  # noqa: F811
+    with client(app) as t:
+        login(app, t, TEACHER, "Dr Teacher")
+        sid, _ = start_session(app, t)
+        h = {"X-CSRF-Token": csrf(t, "/attendance/")}
+        assert 'id="btn-break"' in t.get(f"/attendance/sessions/{sid}/report").text
+        assert 'id="break-stage"' in t.get(f"/attendance/sessions/{sid}").text
+        assert t.get(f"/attendance/sessions/{sid}/break").json() == {"break": None}
+        assert t.post(f"/attendance/sessions/{sid}/break", headers=h, data={"minutes": 0}).status_code == 400
+        b = t.post(f"/attendance/sessions/{sid}/break", headers=h, data={"minutes": 15}).json()["break"]
+        assert round(b["ends_at"] - b["started_at"]) == 900
+        assert "Show the break timer" in t.get(f"/attendance/sessions/{sid}/report").text
+        more = t.post(f"/attendance/sessions/{sid}/break/more", headers=h).json()["break"]
+        assert round(more["ends_at"] - b["ends_at"]) == 60
+        assert t.post(f"/attendance/sessions/{sid}/break/bogus", headers=h).status_code == 404
+        assert t.post(f"/attendance/sessions/{sid}/break/end", headers=h).json() == {"break": None}
+
+        # Students can't start a break, and closing the session ends it.
+        with client(app) as s:
+            login(app, s, STUDENT)
+            join = re.sub(r"^http://testserver", "", t.get(f"/attendance/sessions/{sid}/live").json()["join_url"])
+            sh = {"X-CSRF-Token": re.search(r'data-csrf="([^"]+)"', s.get(join).text).group(1)}
+            assert s.post(f"/attendance/sessions/{sid}/break", headers=sh, data={"minutes": 5}).status_code == 403
+        t.post(f"/attendance/sessions/{sid}/break", headers=h, data={"minutes": 5})
+        t.post(f"/attendance/sessions/{sid}/close", data={"csrf": h["X-CSRF-Token"]})
+        assert t.get(f"/attendance/sessions/{sid}/break").json() == {"break": None}

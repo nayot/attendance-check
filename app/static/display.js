@@ -134,6 +134,7 @@
     es.addEventListener("checkin", (e) => onCheckin(JSON.parse(e.data)));
     es.addEventListener("state", () => refresh());
     es.addEventListener("live", (e) => window.dispatchEvent(new CustomEvent("live-update", { detail: JSON.parse(e.data) })));
+    es.addEventListener("break", (e) => window.dispatchEvent(new CustomEvent("break-update", { detail: JSON.parse(e.data) })));
   }
 
   // Buttons
@@ -156,7 +157,7 @@
   };
   document.addEventListener("keydown", (e) => {
     if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName) || document.querySelector("dialog[open]")) return;
-    if (e.key === " " && !app.classList.contains("live-mode")) { e.preventDefault(); $("btn-pause").click(); }
+    if (e.key === " " && !app.classList.contains("live-mode") && !app.classList.contains("break-mode")) { e.preventDefault(); $("btn-pause").click(); }
     if (e.key === "f") $("btn-full").click();
   });
 
